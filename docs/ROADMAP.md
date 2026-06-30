@@ -215,7 +215,7 @@ Narrative (problem, design decisions, architecture, challenges, solutions, lesso
 
 ## 16. Repository setup (next milestone)
 
-Production-ready scaffold: clear structure, ESLint + Prettier + TypeScript strict, Astro check, Husky + lint-staged, GitHub Actions CI (lint/typecheck/build/content-validate), README, CONTRIBUTING, LICENSE (TBD), `.gitignore`, `.env.example` (`SITE_URL`, analytics id), `AGENTS.md`, `docs/` (DESIGN.md, CONTENT_PIPELINE.md), `scripts/ingest.py`.
+Production-ready scaffold: clear structure, ESLint + Prettier + TypeScript strict, Astro check, Husky + lint-staged, GitHub Actions CI (lint/typecheck/build/content-validate), README, CONTRIBUTING, LICENSE (All rights reserved), `.gitignore`, `.env.example` (`SITE_URL`, analytics id), `AGENTS.md`, `docs/` (DESIGN.md, CONTENT_PIPELINE.md), `scripts/ingest.py`.
 
 ## 17. Milestones / roadmap
 
@@ -231,7 +231,7 @@ Production-ready scaffold: clear structure, ESLint + Prettier + TypeScript stric
 ## 18. Open decisions (track here)
 
 - License — ✅ resolved (proprietary, All rights reserved).
-- Repo name + local path — ✅ resolved (`portfolio` at /home/drijs/portfolio). GitHub remote: not yet created.
+- Repo name + local path — ✅ resolved (`portfolio` at /home/drijs/portfolio). GitHub remote: `Douwe-Rijs/portfolio`.
 - Final accent color + type pairing — ✅ resolved (botanical green + Space Grotesk).
 - Analytics provider — Vercel Web Analytics (default; cookieless).
 - Owned domain (standofl.nl) — deferred; SITE_URL is configurable.
