@@ -1,0 +1,140 @@
+---
+title: 'Autonomous Flight of a Micro Air Vehicle'
+summary: 'A vision-only autonomy stack for a Parrot Bebop 2 that avoids obstacles and flies through a racing gate in TU Delft’s CyberZoo — all on the drone’s own modest processor.'
+role: 'Perception & Integration'
+timeframe: 'Spring 2026'
+teamSize: 8
+contributions:
+  - 'Built the bottom-camera CyberZoo border detector (green safe-area and texture masking) so the drone could stay in bounds without external motion capture.'
+  - 'Implemented the vertical-line (Hough) detector in the multi-layer obstacle stack — Canny edges and a probabilistic Hough transform filtered to solid vertical obstacles.'
+  - 'Integrated the vision modules into the Paparazzi autopilot in C/C++ and handled on-drone build and deployment.'
+  - 'Led hands-on hardware debugging and flight-test troubleshooting on the Bebop during the limited CyberZoo testing slots.'
+  - 'Helped coordinate the team’s work and contributed to project management.'
+tech:
+  - 'Python'
+  - 'C'
+  - 'OpenCV'
+  - 'PyTorch'
+  - 'Paparazzi'
+  - 'Computer Vision'
+  - 'Embedded Systems'
+categories:
+  - 'Robotics'
+  - 'Perception'
+featured: true
+order: 1
+heroImage: '../../assets/projects/autonomous-drone-mav/gate-detection.jpg'
+heroAlt: 'Four-stage gate-detection pipeline on the drone’s front camera: raw CyberZoo feed, blue pixel mask, segment detection, and the final gate locked with a cyan box and a “RIGHT” heading cue.'
+links:
+  repo: 'https://github.com/Mumpaya/paparazzi'
+  demo: 'https://youtu.be/Lsj26em1I9s'
+results:
+  - { label: 'Onboard throughput', value: '8–11 FPS' }
+  - { label: 'Velocity estimator', value: '300 → 55 ms' }
+  - { label: 'CNN classifier', value: '98% val. acc.' }
+  - { label: 'Team', value: '8 engineers' }
+gallery:
+  - src: '../../assets/projects/autonomous-drone-mav/obstacle-perception.jpg'
+    alt: 'Six-panel view of the multi-layer obstacle detector: CLAHE-normalised input, Hough vertical-line edges, orange-pole mask, sparse optical-flow vectors, green-ground disruption scores, and the fused per-column danger map with recommended safe gaps.'
+    caption: 'The multi-layer obstacle detector fuses five classical-vision cues into one per-column danger map and a ranked list of safe gaps.'
+  - src: '../../assets/projects/autonomous-drone-mav/system-architecture.jpg'
+    alt: 'Block diagram: front and bottom cameras feed gate, multi-layer obstacle and border detectors, which feed a state machine driving Normal, Gate Approach, Gate Coast and Avoid Border control states.'
+    caption: 'Perception modules feed a state machine that arbitrates between obstacle avoidance, gate approach and boundary keeping.'
+  - src: '../../assets/projects/autonomous-drone-mav/parrot-bebop.jpg'
+    alt: 'A Parrot Bebop 2 quadcopter with a red body and black bumpers, the platform used for the project.'
+    caption: 'The platform: a Parrot Bebop 2 with front and bottom cameras and an onboard ARM processor.'
+status: 'published'
+publishedDate: 2026-06-30
+---
+
+## Overview
+
+A team of eight engineers built a fully autonomous flight stack for a **Parrot
+Bebop 2** micro air vehicle (MAV) as part of TU Delft's AE4317 course. The drone
+had to explore the **CyberZoo** test arena, avoid the obstacles placed in it, and
+— for bonus points — fly through a racing gate. The hard constraint: everything
+had to run **on the drone's own ARM processor**, using only its front and bottom
+cameras. No external motion capture, no off-board compute.
+
+## The problem
+
+MAVs trade sensing and compute for agility and inherent safety — they are small
+and light, which makes them safe to fly indoors, but leaves very little
+processing headroom. Our target was to keep perception running at roughly **10
+frames per second** onboard; anything slower starves the flight controller's
+update loop and produces erratic, unsafe motion. Every algorithm therefore had
+to earn its place against a strict latency budget while remaining robust to the
+CyberZoo's changing lighting, cluttered background and motion blur.
+
+## Approach & design decisions
+
+We deliberately started simple and added complexity only where it paid off.
+
+We first **prototyped a machine-learning route**: a PyTorch CNN classifier
+reached **98% validation accuracy** across four classes (nothing / pole / gate /
+both), but a YOLO detector reached only **13.9% mAP@50** and would have needed
+far more hand-annotated data to become reliable. Given the annotation effort and
+the onboard compute cost, we **chose not to deploy ML on the drone** and instead
+invested in a layered **classical-vision** stack:
+
+- An **orange-pole avoider** as a baseline obstacle detector and a way to
+  validate the Paparazzi autopilot integration.
+- A **multi-layer obstacle detector** that splits each frame into 22 columns and
+  fuses five cues — sparse optical flow, vertical-line (Hough) edges, an
+  orange-pole mask, a green-ground disruption score, and a textureless-region
+  detector — into a single per-column danger map plus a ranked set of safe gaps.
+- A **gate detector** built on blue-segment (HSV/BGR) masking, morphological
+  cleanup and a geometric pairing filter that rejects mismatched gate posts.
+- A **bottom-camera border detector** to keep the drone inside the arena without
+  relying on external positioning.
+- An **optical-flow velocity estimator** to move toward OptiTrack-free flight.
+
+## Technical architecture
+
+The deployed pipeline is organised as a **state machine** over the perception
+modules. A _Normal_ state continuously evaluates the obstacle detectors; when the
+gate is seen for enough consecutive frames the controller switches to _Gate
+Approach_, flying orthogonally toward the gate centre, then to _Gate Coast_ to
+carry through once the gate leaves the field of view. A detected boundary
+overrides everything and triggers _Avoid Border_. Control outputs are smoothed
+with a moving-average window to damp erratic behaviour.
+
+## Engineering for the compute budget
+
+The defining challenge was latency. The full fused pipeline ran at just **0.6
+FPS** on the Bebop — far too slow, and exactly the cause of the wobbling we saw
+in early flight tests. We responded on two fronts: profile-and-optimise, and
+prefer the simplest module that is robust enough.
+
+The clearest win was the velocity estimator. Its first implementation took
+**300 ms per frame**. Primitive on-drone profiling pinpointed a single culprit —
+OpenCV's `goodFeaturesToTrack` at 250 ms — which we replaced with the **FAST**
+feature detector and a hard cap on tracked features. That cut the frame time to
+**50–70 ms (~14 FPS)**, roughly a five-fold speed-up. For the competition itself
+we deployed the **bottom-camera-only avoider** (8.6 FPS), the most robust
+real-time option we had.
+
+## Results
+
+- **CNN classifier:** 98% validation accuracy (prototype; not deployed onboard).
+- **Velocity estimator:** 300 → ~55 ms per frame, ~5× faster, ~14 FPS.
+- **Deployed perception** ran at **8–11 FPS** on the drone's processor, meeting
+  the real-time target.
+- The **gate detector** reliably localised the gate and rejected geometrically
+  inconsistent post pairs.
+- In the competition the drone flew autonomously for sustained stretches, though
+  less far than we had hoped. We traced the shortfall to an **HSV colour mask
+  calibrated on the centre of the frame**, which under-segmented the frame edges
+  and produced phantom obstacles — a small calibration assumption with an
+  outsized effect on field performance.
+
+## Lessons learned
+
+- **Compute budget is a first-class design constraint.** On embedded hardware
+  the simplest robust solution routinely beats the most capable one.
+- **Profile before optimising.** The 250 ms bottleneck was invisible until it
+  was measured; intuition would have sent us optimising the wrong stage.
+- **Calibration assumptions can dominate field results.** Centre-frame colour
+  calibration quietly determined how far we flew.
+- **Testing time is scarce and valuable.** With only a handful of CyberZoo slots,
+  arriving prepared mattered more than any single algorithmic improvement.
