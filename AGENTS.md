@@ -60,6 +60,10 @@ See `README.md`. Key: case studies are `.mdx` in `src/content/projects/`,
 schema in `src/content.config.ts`, design tokens + prose in
 `src/styles/global.css`, site metadata in `src/consts.ts`.
 
+**Roadmap & milestone status:** the full project plan, sitemap, design
+constitution and milestone checklist live in `docs/ROADMAP.md` — read it to see
+what is done and what is next.
+
 ## Conventions
 
 - **Imports** use the `@/` alias → `src/` (e.g. `@/components/Nav.astro`).

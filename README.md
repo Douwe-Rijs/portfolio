@@ -5,9 +5,9 @@ case studies. Built with **Astro + TypeScript + Tailwind CSS v4 + MDX**, with
 React islands for interactive bits. Each project is a case study generated from
 source material (PDF / PPTX / images / text) via a documented agent pipeline.
 
-> Design philosophy, decisions and the full plan live in [`docs/DESIGN.md`](docs/DESIGN.md)
-> and [`AGENTS.md`](AGENTS.md). The content workflow is in
-> [`docs/CONTENT_PIPELINE.md`](docs/CONTENT_PIPELINE.md).
+> Design philosophy, decisions and the full plan live in [`docs/DESIGN.md`](docs/DESIGN.md),
+> [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`AGENTS.md`](AGENTS.md). The content
+> workflow is in [`docs/CONTENT_PIPELINE.md`](docs/CONTENT_PIPELINE.md).
 
 ## Quickstart
 
@@ -55,7 +55,7 @@ src/
 content/_sources/      # (gitignored) raw source drops for the pipeline
 content/_staging/      # (gitignored) ingest output
 scripts/ingest.py      # Multi-format source → staging
-docs/                  # DESIGN.md, CONTENT_PIPELINE.md
+docs/                  # DESIGN.md, CONTENT_PIPELINE.md, ROADMAP.md
 ```
 
 ## Deployment
