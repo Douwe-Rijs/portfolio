@@ -1,0 +1,40 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# local env
+.env.*.local
+.env.local
+
+# vercel
+.vercel/
+
+# raw source drops + ingest staging (private, not published)
+content/_sources/
+content/_staging/
+
+# python pipeline
+__pycache__/
+*.pyc
+.venv/

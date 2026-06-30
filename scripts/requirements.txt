@@ -1,0 +1,11 @@
+# Python dependencies for the content ingest pipeline (scripts/ingest.py).
+# Install into a virtualenv:
+#     python -m venv .venv && source .venv/bin/activate
+#     pip install -r scripts/requirements.txt
+#
+# Each dependency is only needed for the source formats you actually use.
+
+pymupdf>=1.24      # PDF text + embedded image extraction (imported as `fitz`)
+python-pptx>=0.6.23  # PowerPoint text + image extraction
+Pillow>=10.3       # image decode, downscale, EXIF strip, re-encode
+python-docx>=1.1   # optional: Word (.docx) text + image extraction

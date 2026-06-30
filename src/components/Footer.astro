@@ -1,0 +1,36 @@
+---
+import { SITE, SOCIALS } from '@/consts';
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-32 border-t border-line">
+  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-14 sm:flex-row sm:justify-between">
+    <div>
+      <p class="font-display text-lg text-ink">{SITE.name}</p>
+      <p class="mt-1 text-sm text-muted">{SITE.role}</p>
+    </div>
+
+    <nav aria-label="Footer" class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+      {
+        SOCIALS.map((s) => (
+          <a
+            href={s.href}
+            class="text-muted transition-colors hover:text-ink"
+            rel="me noopener"
+            target="_blank"
+          >
+            {s.label}
+          </a>
+        ))
+      }
+      <a href="/contact" class="text-muted transition-colors hover:text-ink">Contact</a>
+    </nav>
+  </div>
+
+  <div class="mx-auto max-w-6xl px-6 pb-10">
+    <p class="font-mono text-xs text-muted">
+      © {year}
+      {SITE.name}. All rights reserved.
+    </p>
+  </div>
+</footer>

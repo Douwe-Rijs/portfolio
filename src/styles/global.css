@@ -1,0 +1,175 @@
+@import 'tailwindcss';
+
+/* Self-hosted variable fonts (perf + GDPR: no third-party CDN calls). */
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* Dark mode driven by a [data-theme="dark"] attribute on <html>. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* --- Design tokens ---------------------------------------------------------
+   Restrained, editorial palette: ink on warm paper / off-white on charcoal.
+   A single cobalt accent. Everything is a CSS variable so re-theming (and the
+   light/dark switch) is instant. Default accent is provisional — finalised in
+   the design-system milestone with live previews. */
+:root {
+  --base: #faf9f6; /* warm paper */
+  --surface: #f1efe9;
+  --ink: #14151a; /* near-black ink */
+  --muted: #5b5e66;
+  --line: #e4e1d9;
+  --accent: #2f54eb; /* cobalt */
+  --on-accent: #ffffff;
+}
+
+[data-theme='dark'] {
+  --base: #0b0c0e;
+  --surface: #14161a;
+  --ink: #f4f3ef;
+  --muted: #a3a7af;
+  --line: #24272d;
+  --accent: #7d97ff;
+  --on-accent: #0b0c0e;
+}
+
+@theme inline {
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  --color-base: var(--base);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--base);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Honour reduced-motion globally — premium motion must never harm a11y. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Fluid display sizes (clamp) — typography creates interest before colour. */
+@utility display-xl {
+  font-size: clamp(2.75rem, 1.6rem + 5.6vw, 6rem);
+  line-height: 0.98;
+}
+@utility display-lg {
+  font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4rem);
+  line-height: 1.02;
+}
+
+/* Editorial body styling for MDX case-study content. */
+@layer components {
+  .prose {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+  .prose > * + * {
+    margin-top: 1.25em;
+  }
+  .prose h2 {
+    margin-top: 2em;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .prose h3 {
+    margin-top: 1.6em;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .prose a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose strong {
+    color: var(--ink);
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background-color: var(--surface);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+  .prose pre {
+    overflow-x: auto;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .prose pre code {
+    background-color: transparent;
+    padding: 0;
+  }
+  .prose ul {
+    list-style: disc;
+    padding-left: 1.25em;
+  }
+  .prose ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+  .prose blockquote {
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .prose figure img,
+  .prose img {
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+}

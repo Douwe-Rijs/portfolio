@@ -1,0 +1,146 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const experience = [
+  {
+    role: 'Assistant R&D Engineer',
+    org: 'Allseas',
+    period: 'Feb 2025 – Present',
+    points: [
+      'Built an observability platform polling 100+ network switches via SNMP to detect failures such as disconnected sensors and faulty links.',
+      'Aggregated port-level metrics (data rate, VLAN, connection status) for real-time diagnostics and debugging.',
+      'Designed a hybrid OCR/VLM pipeline, evaluating multiple models and improving accuracy to ~81% on curved, noisy industrial data.',
+      'Implemented CI/CD pipelines in Azure DevOps to automate versioning and releases.',
+    ],
+  },
+];
+
+const projects = [
+  {
+    role: 'Autonomous Drone Control',
+    org: 'TU Delft',
+    points: [
+      'Implemented optical-flow–based velocity estimation for quadrotor control.',
+      '~51 s autonomous flight with obstacle avoidance using OptiTrack-assisted localization under constrained sensing.',
+    ],
+  },
+  {
+    role: 'Machine Perception',
+    org: 'TU Delft',
+    points: [
+      'Developed a multi-sensor pipeline (LiDAR, camera, radar) for 3D bounding-box detection.',
+      'Handled noisy real-world data (View-of-Delft dataset).',
+    ],
+  },
+  {
+    role: 'Planning & Decision Making',
+    org: 'TU Delft',
+    points: [
+      'Implemented RRT* motion planning for autonomous navigation.',
+      'Analysed limitations without control integration (MPC) in dynamic scenarios.',
+    ],
+  },
+];
+
+const education = [
+  { degree: 'MSc Robotics', org: 'TU Delft', period: '2025 – Present', note: 'GPA 7.0' },
+  { degree: 'BSc Mechanical Engineering', org: 'TU Delft', period: '2025', note: 'GPA 7.11' },
+  { degree: 'Minor Computer Science', org: 'TU Delft', period: '', note: '' },
+];
+---
+
+<BaseLayout
+  title="Résumé"
+  description="Résumé of Douwe Rijs — Robotics & Machine Learning Engineer, MSc Robotics at TU Delft."
+>
+  <section class="mx-auto max-w-3xl px-6 pt-20 pb-10 sm:pt-28">
+    <div class="flex items-end justify-between gap-6">
+      <h1 class="display-lg text-ink">Résumé</h1>
+      <button
+        id="print-cv"
+        type="button"
+        class="shrink-0 rounded-full border border-line px-4 py-2 text-sm text-ink transition-colors hover:bg-surface"
+      >
+        Save as PDF
+      </button>
+    </div>
+    <p class="mt-6 max-w-2xl text-muted">
+      Robotics &amp; ML engineer with experience building real-world perception, software and ML
+      systems across the autonomy stack.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-6 pb-6">
+    <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Experience</h2>
+    <div class="mt-6 space-y-10">
+      {
+        experience.map((e) => (
+          <div>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+              <h3 class="font-display text-xl text-ink">
+                {e.role} · <span class="text-muted">{e.org}</span>
+              </h3>
+              <span class="font-mono text-xs text-muted">{e.period}</span>
+            </div>
+            <ul class="mt-3 space-y-2 text-muted">
+              {e.points.map((p) => (
+                <li class="flex gap-3">
+                  <span class="text-accent" aria-hidden="true">
+                    —
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-6 py-10">
+    <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Selected robotics & ML</h2>
+    <div class="mt-6 space-y-8">
+      {
+        projects.map((e) => (
+          <div>
+            <h3 class="font-display text-xl text-ink">
+              {e.role} · <span class="text-muted">{e.org}</span>
+            </h3>
+            <ul class="mt-3 space-y-2 text-muted">
+              {e.points.map((p) => (
+                <li class="flex gap-3">
+                  <span class="text-accent" aria-hidden="true">
+                    —
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-3xl border-t border-line px-6 py-10">
+    <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Education</h2>
+    <ul class="mt-6 space-y-4">
+      {
+        education.map((e) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-x-4">
+            <span class="text-ink">
+              {e.degree} · <span class="text-muted">{e.org}</span>
+              {e.note && <span class="text-muted"> · {e.note}</span>}
+            </span>
+            <span class="font-mono text-xs text-muted">{e.period}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <script is:inline>
+    document.getElementById('print-cv')?.addEventListener('click', () => window.print());
+  </script>
+</BaseLayout>

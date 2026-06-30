@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { SITE } from '@/consts';
+
+const projects = (await getCollection('projects', (p) => p.data.status === 'published')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const featured = projects.filter((p) => p.data.featured);
+const showcase = (featured.length > 0 ? featured : projects).slice(0, 4);
+
+const focus = ['Perception', 'Planning', 'Control', 'ML systems'];
+---
+
+<BaseLayout>
+  <section class="mx-auto max-w-6xl px-6 pt-20 pb-16 sm:pt-28">
+    <p class="font-mono text-sm tracking-[0.2em] text-muted uppercase">{SITE.role}</p>
+    <h1 class="mt-6 max-w-[15ch] display-xl text-ink">
+      Machines that perceive, decide, and act in the real world.
+    </h1>
+    <p class="mt-8 max-w-2xl text-lg leading-relaxed text-muted">
+      MSc Robotics at TU Delft and R&amp;D at Allseas. I work across the autonomy stack —
+      perception, planning, and control — turning noisy, real-world signals into systems that hold
+      up outside the lab.
+    </p>
+    <div class="mt-10 flex flex-wrap items-center gap-5">
+      <a
+        href="/work"
+        class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity hover:opacity-90"
+      >
+        View selected work
+      </a>
+      <a href="/about" class="text-sm text-ink underline-offset-4 hover:underline">About me →</a>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl border-t border-line px-6 py-12">
+    <ul class="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
+      {
+        focus.map((f, i) => (
+          <li>
+            <span class="font-mono text-sm text-muted">0{i + 1}</span>
+            <p class="mt-2 font-display text-xl text-ink">{f}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 py-16">
+    <div class="flex items-end justify-between">
+      <h2 class="display-lg text-ink">Selected work</h2>
+      <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">All projects →</a>
+    </div>
+    {
+      showcase.length > 0 ? (
+        <div class="mt-12 grid gap-x-10 gap-y-16 sm:grid-cols-2">
+          {showcase.map((p, i) => (
+            <ProjectCard project={p} priority={i < 2} />
+          ))}
+        </div>
+      ) : (
+        <p class="mt-8 max-w-prose text-lg text-muted">
+          Case studies are being prepared — the first, an autonomous micro-air-vehicle built at TU
+          Delft’s MAVLab, lands here shortly.
+        </p>
+      )
+    }
+  </section>
+</BaseLayout>
