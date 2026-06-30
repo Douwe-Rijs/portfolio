@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Lightbox from './Lightbox.tsx';
+
+/**
+ * A group of images for the `gallery` vibe (and anywhere an image cluster beats
+ * prose). Three rhythms: even `grid`, column-flow `masonry`, and a horizontal
+ * `filmstrip`. Optional `lightbox` mounts a tiny island for click-to-zoom.
+ */
+interface GalleryImage {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+}
+interface Props {
+  images: GalleryImage[];
+  variant?: 'grid' | 'masonry' | 'filmstrip';
+  columns?: 2 | 3;
+  lightbox?: boolean;
+  reveal?: boolean;
+}
+
+const { images, variant = 'grid', columns = 2, lightbox = false, reveal = false } = Astro.props;
+
+const colClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
+const masonryCols = columns === 3 ? 'sm:columns-3' : 'sm:columns-2';
+---
+
+{/* Static, accessible markup; the island only enhances it when present. */}
+<div
+  class="not-prose full-bleed my-[var(--rhythm)] px-6"
+  data-reveal={reveal ? 'out' : undefined}
+  data-gallery={lightbox ? 'true' : undefined}
+>
+  <div class="mx-auto max-w-6xl">
+    {
+      variant === 'filmstrip' ? (
+        <div class="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
+          {images.map((img, i) => (
+            <figure class="w-[80%] flex-none snap-center sm:w-[48%]">
+              <Image
+                src={img.src}
+                alt={img.alt}
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 640px) 48vw, 80vw"
+                loading="lazy"
+                class="w-full rounded-token border border-line object-cover"
+                data-zoom-index={i}
+              />
+              {img.caption && (
+                <figcaption class="mt-2 font-mono text-xs text-muted">{img.caption}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      ) : variant === 'masonry' ? (
+        <div class={`columns-1 gap-5 ${masonryCols}`}>
+          {images.map((img, i) => (
+            <figure class="mb-5 break-inside-avoid">
+              <Image
+                src={img.src}
+                alt={img.alt}
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                loading="lazy"
+                class="w-full rounded-token border border-line object-cover"
+                data-zoom-index={i}
+              />
+              {img.caption && (
+                <figcaption class="mt-2 font-mono text-xs text-muted">{img.caption}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <div class={`grid grid-cols-1 gap-5 ${colClass}`}>
+          {images.map((img, i) => (
+            <figure>
+              <Image
+                src={img.src}
+                alt={img.alt}
+                widths={[480, 800, 1200]}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                loading="lazy"
+                class="w-full rounded-token border border-line object-cover"
+                data-zoom-index={i}
+              />
+              {img.caption && (
+                <figcaption class="mt-2 font-mono text-xs text-muted">{img.caption}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      )
+    }
+  </div>
+  {
+    lightbox && (
+      <Lightbox
+        client:visible
+        images={images.map((img) => ({
+          src: img.src.src,
+          alt: img.alt,
+          caption: img.caption,
+        }))}
+      />
+    )
+  }
+</div>

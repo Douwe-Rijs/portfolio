@@ -1,0 +1,14 @@
+---
+/**
+ * Small mono uppercase eyebrow label to mark sections. Pairs with headings to
+ * give structure without heavy chrome.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<p class={`not-prose font-mono text-xs tracking-[0.2em] text-accent uppercase ${className}`}>
+  <slot />
+</p>

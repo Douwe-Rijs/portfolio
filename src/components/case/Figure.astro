@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+/**
+ * A single responsive image with an optional caption — the workhorse of the
+ * editorial kit. Replaces raw Markdown `![]()` so every in-body image is
+ * optimised, token-radius'd and (optionally) numbered like a paper figure.
+ */
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Figure number for the `paper` vibe (e.g. "1" → "Fig. 1"). */
+  figNumber?: number | string;
+  widths?: number[];
+  sizes?: string;
+  priority?: boolean;
+  bordered?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  figNumber,
+  widths = [640, 1024, 1600],
+  sizes = '(min-width: 768px) 768px, 100vw',
+  priority = false,
+  bordered = true,
+  class: className = '',
+} = Astro.props;
+---
+
+<figure class={`not-prose ${className}`}>
+  <Image
+    src={src}
+    alt={alt}
+    widths={widths}
+    sizes={sizes}
+    loading={priority ? 'eager' : 'lazy'}
+    class={`w-full rounded-token object-cover ${bordered ? 'border border-line' : ''}`}
+  />
+  {
+    (caption || figNumber != null) && (
+      <figcaption class="mt-3 font-mono text-xs leading-relaxed text-muted">
+        {figNumber != null && <span class="text-accent">Fig.&nbsp;{figNumber} — </span>}
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>

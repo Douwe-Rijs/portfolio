@@ -1,0 +1,55 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseStudy from '@/components/case/CaseStudy.astro';
+
+/**
+ * Dev/preview-only route: renders the same MAV case study in each of the five
+ * vibe presets so they can be compared side by side. Not linked from the site;
+ * delete `src/pages/preview/` when no longer needed.
+ */
+const PRESETS = ['editorial', 'showcase', 'paper', 'gallery', 'motion'] as const;
+type Preset = (typeof PRESETS)[number];
+
+export function getStaticPaths() {
+  return ['editorial', 'showcase', 'paper', 'gallery', 'motion'].map((preset) => ({
+    params: { preset },
+  }));
+}
+
+const { preset } = Astro.params as { preset: Preset };
+const project = await getEntry('projects', 'autonomous-drone-mav');
+if (!project) throw new Error('Preview project "autonomous-drone-mav" not found');
+---
+
+<BaseLayout
+  title={`Preview · ${preset}`}
+  description={`MAV case study in the ${preset} vibe.`}
+  noindex
+>
+  {/* Floating preset switcher so you can flip between styles instantly. */}
+  <nav
+    aria-label="Preview styles"
+    class="sticky top-0 z-50 border-b border-line bg-base/80 backdrop-blur"
+  >
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-6 py-3">
+      <span class="mr-2 font-mono text-xs tracking-wider text-muted uppercase">Vibe preview</span>
+      {
+        PRESETS.map((p) => (
+          <a
+            href={`/preview/${p}`}
+            class={`rounded-full border px-3 py-1 font-mono text-xs transition-colors ${
+              p === preset
+                ? 'border-accent bg-accent text-on-accent'
+                : 'border-line text-muted hover:text-ink'
+            }`}
+          >
+            {p}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+
+  <CaseStudy project={project} presetOverride={preset} />
+</BaseLayout>

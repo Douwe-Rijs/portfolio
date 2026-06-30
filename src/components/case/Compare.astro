@@ -1,0 +1,45 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import CompareIsland from './Compare.tsx';
+
+/**
+ * Astro wrapper for the before/after slider — optimises both images at build
+ * time, then hands them to the interactive island. Use for genuine pairs
+ * (e.g. input frame vs. detector output); both need honest, descriptive alt text.
+ */
+interface Props {
+  one: ImageMetadata;
+  two: ImageMetadata;
+  altOne: string;
+  altTwo: string;
+  labelOne?: string;
+  labelTwo?: string;
+  widths?: number[];
+  class?: string;
+}
+
+const {
+  one,
+  two,
+  altOne,
+  altTwo,
+  labelOne,
+  labelTwo,
+  widths = [640, 1024, 1600],
+  class: className = '',
+} = Astro.props;
+
+const o1 = await getImage({ src: one, widths, format: 'webp' });
+const o2 = await getImage({ src: two, widths, format: 'webp' });
+---
+
+<div class={`not-prose my-[var(--rhythm)] ${className}`}>
+  <CompareIsland
+    client:visible
+    one={{ src: o1.src, srcSet: o1.srcSet?.attribute, alt: altOne }}
+    two={{ src: o2.src, srcSet: o2.srcSet?.attribute, alt: altTwo }}
+    labelOne={labelOne}
+    labelTwo={labelTwo}
+  />
+</div>

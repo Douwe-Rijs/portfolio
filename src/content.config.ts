@@ -26,6 +26,30 @@ const projects = defineCollection({
       order: z.number().default(0),
       heroImage: image(),
       heroAlt: z.string().min(1, 'heroAlt is required for accessibility'),
+      /**
+       * Per-project "vibe". Each preset is a coherent package (layout shell +
+       * type + palette + motion) so every case study can feel distinct while
+       * sharing one accessible, token-based system. Unspecified → 'editorial'.
+       */
+      preset: z.enum(['editorial', 'showcase', 'paper', 'gallery', 'motion']).default('editorial'),
+      /** Optional fine-grain token overrides layered on top of the preset. */
+      theme: z
+        .object({
+          accent: z.string(),
+          accentDark: z.string(),
+          surface: z.string(),
+          font: z.enum(['grotesk', 'serif', 'mono']),
+          radius: z.enum(['sharp', 'soft', 'round']),
+          density: z.enum(['airy', 'normal', 'tight']),
+        })
+        .partial()
+        .optional(),
+      /** How the hero renders for this project. */
+      heroLayout: z.enum(['full-bleed', 'split', 'boxed']).default('boxed'),
+      /** Pin the article frame to a theme regardless of the global toggle. */
+      forceTheme: z.enum(['light', 'dark']).optional(),
+      /** Optional secondary image (texture / accent / parallax layer). */
+      accentImage: image().optional(),
       links: z
         .object({
           repo: z.string().url().optional(),

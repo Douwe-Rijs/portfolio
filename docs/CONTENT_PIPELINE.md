@@ -63,6 +63,7 @@ summary: 'A vision-only micro air vehicle that detects and races through gates a
 role: 'Perception & Control'
 timeframe: 'Sep–Dec 2024'
 teamSize: 8
+preset: 'editorial' # the project's "vibe" — see below
 contributions:
   - 'Built the gate-detection vision pipeline'
   - 'Tuned the state estimation + control loop'
@@ -78,7 +79,7 @@ links:
 results:
   - { label: 'Gate detection', value: '94% recall' }
   - { label: 'Lap time', value: '12.4 s' }
-gallery:
+gallery: # optional; used by the `gallery` preset and as a fallback image strip
   - {
       src: '../../assets/projects/autonomous-drone-mav/pipeline.jpg',
       alt: 'Six-stage vision pipeline from raw frame to gate pose',
@@ -93,10 +94,67 @@ publishedDate: 2024-12-15
 ...
 ```
 
-Then write the **MDX body** as an editorial narrative, in this order:
+### Choose a "vibe" (`preset`)
+
+Every project renders with its **own vibe** so no two case studies feel like the
+same template. Pick the `preset` that fits the work; layer optional `theme{}`
+overrides on top.
+
+| `preset`    | Feel                          | Hero       | Type    | Motion         |
+| :---------- | :---------------------------- | :--------- | :------ | :------------- |
+| `editorial` | refined default, interleaved  | boxed      | grotesk | none           |
+| `showcase`  | big imagery, bold type, dark  | full-bleed | grotesk | none           |
+| `paper`     | academic, quiet, serif column | split      | serif   | none           |
+| `gallery`   | image-first, click-to-zoom    | full-bleed | grotesk | lazy lightbox  |
+| `motion`    | scroll reveals / parallax     | boxed      | grotesk | lazy IO island |
+
+Optional fine-grain overrides (all optional, layered over the preset):
+
+```yaml
+theme:
+  accent: '#b45309' # light-mode accent (also shows on the index card)
+  accentDark: '#fbbf24' # dark-mode accent
+  surface: '#f5f1ea'
+  font: 'serif' # grotesk | serif | mono
+  radius: 'sharp' # sharp | soft | round
+  density: 'tight' # airy | normal | tight  (reading width + rhythm)
+heroLayout: 'split' # full-bleed | split | boxed
+forceTheme: 'dark' # pin the article frame to light/dark
+```
+
+### Compose the body with the editorial kit
+
+Write the **MDX body** as an editorial narrative, in this order:
 
 **Overview → Problem → Design decisions → Technical architecture → Challenges →
 Solutions → Results → Lessons learned**
+
+To stay **image-centric** (not "rendered Markdown"), weave imagery through the
+prose with the kit in `src/components/case/` — these are available in every MDX
+body **without importing the component** (just `import` the image asset):
+
+```mdx
+import pipeline from '../../assets/projects/<slug>/pipeline.jpg';
+
+<Figure src={pipeline} alt="…" figNumber="1" caption="…" /> {/* responsive image + caption */}
+<FullBleed src={pipeline} alt="…" caption="…" /> {/* edge-to-edge breakout */}
+<Split src={pipeline} alt="…" reverse>
+  Markdown text beside the image…
+</Split>
+<Gallery images={[{ src: pipeline, alt: '…' }]} variant="masonry" lightbox />
+<Metrics items={[{ label: 'FPS', value: '11' }]} variant="bold" />
+<PullQuote cite="…">A line worth enlarging.</PullQuote>
+<SectionLabel>Method</SectionLabel>
+
+{/* Interactive islands (lazy, reduced-motion safe) */}
+
+<ScrollParallax src={hero} alt="…" /> {/* scroll-linked parallax image */}
+<Compare one={raw} two={overlay} altOne="…" altTwo="…" labelOne="Input" labelTwo="Detected" />
+```
+
+The interactive pieces (`ScrollParallax`, `Compare`, and the count-up animation
+in `Metrics variant="bold"`) hydrate **only on the pages that use them** and all
+honour `prefers-reduced-motion`, so quiet presets stay ~0 KB JS.
 
 Authoring rules:
 
@@ -105,12 +163,13 @@ Authoring rules:
   `pipeline.jpg`), and reference them with paths **relative to the `.mdx` file**
   (`../../assets/projects/<slug>/…`). The `image()` schema helper validates and
   optimises them; broken paths fail the build.
-- **Alt text is mandatory** on `heroAlt` and every gallery image — describe the
-  content, not "image of…". Missing alt = failed build (a11y gate).
+- **Alt text is mandatory** on `heroAlt` and every kit/gallery image — describe
+  the content, not "image of…". Missing alt = failed build (a11y gate).
 - **Write honestly.** Clear, concise, recruiter-appropriate. State _your_
   contribution on team projects. Never exaggerate metrics or scope.
 - **Follow the design constitution** (`docs/DESIGN.md`): editorial rhythm, large
-  imagery, restrained tone.
+  imagery, restrained tone. Any custom `theme.accent` must pass AA contrast in
+  both light and dark.
 - Keep `summary` ≤ 200 characters (used in the index and meta description).
 - Use `status: draft` while iterating; only `published` projects are routed and
   listed.

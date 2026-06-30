@@ -16,7 +16,12 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  integrations: [mdx(), react(), sitemap()],
+  integrations: [
+    mdx(),
+    react(),
+    // Keep internal preview routes out of the public sitemap.
+    sitemap({ filter: (page) => !page.includes('/preview/') }),
+  ],
   markdown: {
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },

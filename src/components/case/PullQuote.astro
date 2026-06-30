@@ -1,0 +1,18 @@
+---
+/**
+ * Oversized editorial pull-quote to break up long prose and set a tone. Quote
+ * text via the default slot; optional attribution via `cite`.
+ */
+interface Props {
+  cite?: string;
+  class?: string;
+}
+const { cite, class: className = '' } = Astro.props;
+---
+
+<blockquote class={`not-prose my-[var(--rhythm)] ${className}`}>
+  <p class="max-w-3xl font-display text-2xl leading-snug text-balance text-ink sm:text-3xl">
+    <slot />
+  </p>
+  {cite && <cite class="mt-4 block font-mono text-xs text-muted not-italic">— {cite}</cite>}
+</blockquote>

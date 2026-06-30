@@ -1,0 +1,213 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import ScrollParallax from './ScrollParallax.astro';
+
+/**
+ * Case-study hero with three structural variants so each preset opens
+ * differently:
+ *  - `boxed`      — title block, then a contained rounded hero (editorial).
+ *  - `split`      — title beside the image (paper / technical).
+ *  - `full-bleed` — edge-to-edge hero; `overlay` drops the title onto it (showcase).
+ */
+interface Props {
+  title: string;
+  role: string;
+  timeframe: string;
+  teamSize?: number | string;
+  summary: string;
+  image: ImageMetadata;
+  alt: string;
+  links?: { repo?: string; demo?: string; paper?: string };
+  variant?: 'boxed' | 'split' | 'full-bleed';
+  overlay?: boolean;
+  /** Drives heading scale: showcase wants the biggest type. */
+  big?: boolean;
+}
+
+const {
+  title,
+  role,
+  timeframe,
+  teamSize,
+  summary,
+  image,
+  alt,
+  links = {},
+  variant = 'boxed',
+  overlay = false,
+  big = false,
+} = Astro.props;
+
+const hasLinks = links.repo || links.demo || links.paper;
+const titleSize = big ? 'display-xl' : 'display-lg';
+---
+
+{/* Reusable meta row + links so each variant stays DRY. */}
+{
+  variant === 'full-bleed' && (
+    <header class={overlay ? 'relative' : ''}>
+      <div class={overlay ? '' : 'mx-auto max-w-6xl px-6 pt-16 sm:pt-24'}>
+        {overlay ? (
+          <figure class="relative">
+            <ScrollParallax
+              src={image}
+              alt={alt}
+              class="h-[78vh] min-h-[28rem] w-full"
+              strength={6}
+              eager
+            />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+            <figcaption class="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-6 pb-12 text-white">
+              <div class="flex items-center gap-3 font-mono text-xs tracking-wider uppercase opacity-80">
+                <span>{role}</span>
+                <span aria-hidden="true">·</span>
+                <span>{timeframe}</span>
+                {teamSize && <span aria-hidden="true">·</span>}
+                {teamSize && <span>Team of {teamSize}</span>}
+              </div>
+              <h1 class={`mt-4 max-w-[18ch] ${titleSize}`}>{title}</h1>
+            </figcaption>
+          </figure>
+        ) : (
+          <>
+            <div class="flex items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase">
+              <span>{role}</span>
+              <span aria-hidden="true">·</span>
+              <span>{timeframe}</span>
+              {teamSize && <span aria-hidden="true">·</span>}
+              {teamSize && <span>Team of {teamSize}</span>}
+            </div>
+            <h1 class={`mt-4 text-ink ${titleSize}`}>{title}</h1>
+          </>
+        )}
+      </div>
+      {!overlay && (
+        <figure class="full-bleed mt-10">
+          <Image
+            src={image}
+            alt={alt}
+            widths={[768, 1280, 1920, 2400]}
+            sizes="100vw"
+            loading="eager"
+            class="aspect-[21/9] w-full object-cover"
+          />
+        </figure>
+      )}
+      <div class="mx-auto max-w-6xl px-6">
+        <p class="mt-8 max-w-2xl text-lg leading-relaxed text-muted">{summary}</p>
+        {hasLinks && (
+          <div class="mt-6 flex flex-wrap gap-5 text-sm">
+            {links.demo && (
+              <a class="text-accent underline-offset-4 hover:underline" href={links.demo}>
+                Live demo ↗
+              </a>
+            )}
+            {links.repo && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.repo}>
+                Repository ↗
+              </a>
+            )}
+            {links.paper && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.paper}>
+                Paper ↗
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </header>
+  )
+}
+
+{
+  variant === 'split' && (
+    <header class="mx-auto grid max-w-6xl items-center gap-10 px-6 pt-16 sm:pt-24 lg:grid-cols-2 lg:gap-14">
+      <div>
+        <div class="flex items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase">
+          <span>{role}</span>
+          <span aria-hidden="true">·</span>
+          <span>{timeframe}</span>
+          {teamSize && <span aria-hidden="true">·</span>}
+          {teamSize && <span>Team of {teamSize}</span>}
+        </div>
+        <h1 class={`mt-4 text-ink ${titleSize}`}>{title}</h1>
+        <p class="mt-6 text-lg leading-relaxed text-muted">{summary}</p>
+        {hasLinks && (
+          <div class="mt-6 flex flex-wrap gap-5 text-sm">
+            {links.demo && (
+              <a class="text-accent underline-offset-4 hover:underline" href={links.demo}>
+                Live demo ↗
+              </a>
+            )}
+            {links.repo && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.repo}>
+                Repository ↗
+              </a>
+            )}
+            {links.paper && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.paper}>
+                Paper ↗
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+      <Image
+        src={image}
+        alt={alt}
+        widths={[600, 1000, 1400]}
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        loading="eager"
+        class="w-full rounded-token border border-line object-cover"
+      />
+    </header>
+  )
+}
+
+{
+  variant === 'boxed' && (
+    <header>
+      <div class="mx-auto max-w-6xl px-6 pt-16 sm:pt-24">
+        <div class="flex items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase">
+          <span>{role}</span>
+          <span aria-hidden="true">·</span>
+          <span>{timeframe}</span>
+          {teamSize && <span aria-hidden="true">·</span>}
+          {teamSize && <span>Team of {teamSize}</span>}
+        </div>
+        <h1 class={`mt-4 text-ink ${titleSize}`}>{title}</h1>
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">{summary}</p>
+        {hasLinks && (
+          <div class="mt-6 flex flex-wrap gap-5 text-sm">
+            {links.demo && (
+              <a class="text-accent underline-offset-4 hover:underline" href={links.demo}>
+                Live demo ↗
+              </a>
+            )}
+            {links.repo && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.repo}>
+                Repository ↗
+              </a>
+            )}
+            {links.paper && (
+              <a class="text-ink underline-offset-4 hover:underline" href={links.paper}>
+                Paper ↗
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+      <div class="mx-auto mt-12 max-w-6xl px-6">
+        <Image
+          src={image}
+          alt={alt}
+          widths={[640, 1024, 1600]}
+          sizes="(min-width: 1152px) 1088px, 100vw"
+          loading="eager"
+          class="w-full rounded-token border border-line object-cover"
+        />
+      </div>
+    </header>
+  )
+}

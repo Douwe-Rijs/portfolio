@@ -92,12 +92,23 @@ Full detail in `docs/CONTENT_PIPELINE.md`. To add a case study:
 3. **Author** `src/content/projects/<slug>.mdx`:
    - Fill frontmatter per the schema (`src/content.config.ts`). Required:
      `title, summary, role, timeframe, heroImage, heroAlt, publishedDate`.
+   - **Pick a `preset`** (the project's "vibe") so each case study renders
+     differently — `editorial` (default), `showcase` (big imagery, bold, dark),
+     `paper` (academic serif column), `gallery` (image-first + lightbox), or
+     `motion` (scroll reveals). Layer optional `theme{}` overrides (accent, font,
+     density, radius) and `forceTheme` on top.
    - Copy the chosen images from staging into
      `src/assets/projects/<slug>/` and reference them in frontmatter/body.
    - Write the narrative in the MDX body using these sections, in order:
      **Overview → Problem → Design decisions → Technical architecture →
      Challenges → Solutions → Results → Lessons learned**. Keep prose clear,
      concise, recruiter-appropriate, and **honest — never exaggerate**.
+   - **Stay image-centric:** weave imagery through the prose with the editorial
+     kit in `src/components/case/` (`Figure`, `FullBleed`, `Split`, `Gallery`,
+     `Metrics`, `PullQuote`, `SectionLabel`) plus interactive islands
+     (`ScrollParallax`, `Compare`, animated `Metrics`) — available in every MDX
+     body without importing the component. Islands hydrate lazily and respect
+     `prefers-reduced-motion`. Never leave a case study as plain prose.
    - Set `status: published` and `featured: true` for homepage projects.
 4. `npm run build` validates everything.
 

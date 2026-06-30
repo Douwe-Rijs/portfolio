@@ -9,9 +9,12 @@ interface Props {
 
 const { project, priority = false } = Astro.props;
 const { data } = project;
+
+// Surface each project's own accent on its card so the index hints the vibe.
+const cardStyle = data.theme?.accent ? `--accent:${data.theme.accent}` : undefined;
 ---
 
-<a href={`/work/${project.id}`} class="group block">
+<a href={`/work/${project.id}`} class="group block" style={cardStyle}>
   <article>
     <div class="overflow-hidden rounded-xl border border-line bg-surface">
       <Image
@@ -42,6 +45,10 @@ const { data } = project;
           </ul>
         )
       }
+      <span class="mt-4 inline-flex items-center gap-1 text-sm text-accent">
+        View case study
+        <span class="transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+      </span>
     </div>
   </article>
 </a>

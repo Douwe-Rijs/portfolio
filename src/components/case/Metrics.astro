@@ -1,0 +1,89 @@
+---
+import AnimatedNumber from './AnimatedNumber.tsx';
+
+/**
+ * Result/metric chips. `variant` lets each preset restyle the same data:
+ * `rule` (default editorial — left-ruled columns), `bold` (oversized for
+ * showcase, with count-up animation on clean numeric values), `inline` (quiet
+ * run-in for paper).
+ */
+interface Metric {
+  label: string;
+  value: string;
+}
+interface Props {
+  items: Metric[];
+  variant?: 'rule' | 'bold' | 'inline';
+  class?: string;
+}
+
+const { items, variant = 'rule', class: className = '' } = Astro.props;
+
+/**
+ * Animate a metric only when its value contains exactly one number, so e.g.
+ * "98% val. acc." counts up but "8–11 FPS" / "300 → 55 ms" stay static (honest).
+ */
+function parseSingleNumber(value: string) {
+  const matches = value.match(/-?\d[\d,]*\.?\d*/g);
+  if (!matches || matches.length !== 1) return null;
+  const token = matches[0];
+  const idx = value.indexOf(token);
+  const num = parseFloat(token.replace(/,/g, ''));
+  if (Number.isNaN(num)) return null;
+  const decimals = token.includes('.') ? token.split('.')[1].length : 0;
+  return {
+    prefix: value.slice(0, idx),
+    suffix: value.slice(idx + token.length),
+    value: num,
+    decimals,
+  };
+}
+
+const parsed = items.map((m) => ({
+  ...m,
+  num: variant === 'bold' ? parseSingleNumber(m.value) : null,
+}));
+---
+
+{
+  variant === 'bold' ? (
+    <dl class={`not-prose grid grid-cols-2 gap-8 sm:grid-cols-4 ${className}`}>
+      {parsed.map((m) => (
+        <div>
+          <dd class="display-lg text-ink">
+            {m.num ? (
+              <AnimatedNumber
+                client:visible
+                value={m.num.value}
+                prefix={m.num.prefix}
+                suffix={m.num.suffix}
+                decimals={m.num.decimals}
+              />
+            ) : (
+              m.value
+            )}
+          </dd>
+          <dt class="mt-1 font-mono text-xs tracking-wider text-muted uppercase">{m.label}</dt>
+        </div>
+      ))}
+    </dl>
+  ) : variant === 'inline' ? (
+    <dl class={`not-prose flex flex-wrap gap-x-8 gap-y-2 font-mono text-sm ${className}`}>
+      {items.map((m) => (
+        <div class="flex items-baseline gap-2">
+          <dt class="text-muted">{m.label}:</dt>
+          <dd class="text-ink">{m.value}</dd>
+        </div>
+      ))}
+    </dl>
+  ) : (
+    <dl class={`not-prose grid grid-cols-2 gap-8 sm:grid-cols-4 ${className}`}>
+      {items.map((m) => (
+        <div class="border-l border-line pl-4">
+          <dt class="font-mono text-xs tracking-wider text-muted uppercase">{m.label}</dt>
+          <dd class="mt-1 font-display text-2xl text-ink">{m.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}

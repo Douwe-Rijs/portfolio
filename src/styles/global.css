@@ -4,6 +4,8 @@
 @import '@fontsource-variable/space-grotesk';
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
+/* Serif display — used by the `paper`/serif vibe (opt-in per project). */
+@import '@fontsource-variable/fraunces';
 
 /* Dark mode driven by a [data-theme="dark"] attribute on <html>. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
@@ -15,21 +17,25 @@
    instant. */
 :root {
   --base: #faf9f6; /* warm paper */
-  --surface: #f1efe9;
+  --surface-base: #f1efe9;
   --ink: #14151a; /* near-black ink */
   --muted: #5b5e66;
   --line: #e4e1d9;
-  --accent: #15803d; /* botanical green */
+  --accent-base: #15803d; /* botanical green */
   --on-accent: #ffffff;
+
+  /* Active tokens — per-project `.case-frame` can override the *-base values. */
+  --surface: var(--surface-base);
+  --accent: var(--accent-base);
 }
 
 [data-theme='dark'] {
   --base: #0b0c0e;
-  --surface: #14161a;
+  --surface-base: #14161a;
   --ink: #f4f3ef;
   --muted: #a3a7af;
   --line: #24272d;
-  --accent: #4ade80;
+  --accent-base: #4ade80;
   --on-accent: #0b0c0e;
 }
 
@@ -187,5 +193,116 @@
   .prose img {
     border-radius: 12px;
     border: 1px solid var(--line);
+  }
+}
+
+/* --- Per-project "vibe" system --------------------------------------------
+   Each case study renders inside `.case-frame`, which seeds overridable tokens.
+   A preset (and optional `theme{}` frontmatter) tweaks these via classes /
+   inline style, so projects feel distinct while staying token-based and
+   accessible. `--measure` = prose width, `--rhythm` = section gap, `--radius` =
+   media corners, `--font-display` = display family for this article subtree. */
+@layer components {
+  .case-frame {
+    --measure: 65ch;
+    --rhythm: 5rem;
+    --radius: 1rem;
+    /* Optional per-project overrides (`--accent-o`, `--surface-o`) fall back to
+       the global tokens, so projects that set nothing are unaffected. */
+    --accent: var(--accent-o, var(--accent-base));
+    --surface: var(--surface-o, var(--surface-base));
+    background-color: var(--base);
+    color: var(--ink);
+  }
+  /* Dark-specific accent override (`--accent-do`) when a project sets one. */
+  [data-theme='dark'] .case-frame {
+    --accent: var(--accent-do, var(--accent-o, var(--accent-base)));
+  }
+  .case-frame :where(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+  }
+}
+
+/* Density → reading measure + vertical rhythm. */
+@utility density-airy {
+  --measure: 72ch;
+  --rhythm: 7.5rem;
+}
+@utility density-normal {
+  --measure: 65ch;
+  --rhythm: 5rem;
+}
+@utility density-tight {
+  --measure: 58ch;
+  --rhythm: 3.5rem;
+}
+
+/* Media corner radius presets. */
+@utility radius-sharp {
+  --radius: 0px;
+}
+@utility radius-soft {
+  --radius: 1rem;
+}
+@utility radius-round {
+  --radius: 1.75rem;
+}
+
+/* Per-project display family swaps (token override for the subtree). */
+@utility font-display-grotesk {
+  --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+}
+@utility font-display-serif {
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+}
+@utility font-display-mono {
+  --font-display: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Token-driven corner radius for media primitives. */
+@utility rounded-token {
+  border-radius: var(--radius);
+}
+
+/* Full-bleed breakout — escape the centred column to the viewport edges. */
+@utility full-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Reading column whose width follows the active density token. */
+@utility measure {
+  max-width: var(--measure);
+}
+
+/* Section spacing that follows the active density token. */
+@utility rhythm-y {
+  & > * + * {
+    margin-top: var(--rhythm);
+  }
+}
+
+/* --- Motion preset: scroll-reveal primitive (0 JS; CSS + tiny IO island) ---
+   Elements start hidden and rise in when `data-reveal` flips to "in".
+   Always degrades to instantly-visible under reduced-motion. */
+@layer components {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  [data-reveal='in'] {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 }

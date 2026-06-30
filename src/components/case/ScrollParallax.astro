@@ -1,0 +1,43 @@
+---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import ScrollParallaxIsland from './ScrollParallax.tsx';
+
+/**
+ * Astro wrapper for the parallax island: it runs the image through Astro's
+ * build-time optimiser (`getImage` → WebP + srcset) and hands the optimised
+ * URLs to the React island. Keeps responsive/optimised images AND interactivity.
+ */
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  class?: string;
+  widths?: number[];
+  sizes?: string;
+  strength?: number;
+  eager?: boolean;
+}
+
+const {
+  src,
+  alt,
+  class: className = 'aspect-[21/9]',
+  widths = [768, 1280, 1920, 2400],
+  sizes = '100vw',
+  strength = 8,
+  eager = false,
+} = Astro.props;
+
+const optimized = await getImage({ src, widths, format: 'webp', sizes });
+---
+
+<ScrollParallaxIsland
+  client:visible
+  src={optimized.src}
+  srcSet={optimized.srcSet?.attribute}
+  sizes={sizes}
+  alt={alt}
+  className={className}
+  strength={strength}
+  eager={eager}
+/>

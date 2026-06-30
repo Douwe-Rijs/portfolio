@@ -1,0 +1,205 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import CaseHero from '@/components/case/CaseHero.astro';
+import Figure from '@/components/case/Figure.astro';
+import FullBleed from '@/components/case/FullBleed.astro';
+import Split from '@/components/case/Split.astro';
+import Gallery from '@/components/case/Gallery.astro';
+import Metrics from '@/components/case/Metrics.astro';
+import PullQuote from '@/components/case/PullQuote.astro';
+import SectionLabel from '@/components/case/SectionLabel.astro';
+import ScrollParallax from '@/components/case/ScrollParallax.astro';
+import Compare from '@/components/case/Compare.astro';
+import RevealInit from '@/components/case/RevealInit.astro';
+
+/**
+ * Renders a project case study in its chosen "vibe". `presetOverride` lets the
+ * preview route re-render the same content in a different preset without
+ * touching the project's frontmatter.
+ */
+interface Props {
+  project: CollectionEntry<'projects'>;
+  presetOverride?: 'editorial' | 'showcase' | 'paper' | 'gallery' | 'motion';
+}
+
+const { project, presetOverride } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+
+const activePreset = presetOverride ?? data.preset;
+
+const PRESETS = {
+  editorial: {
+    hero: 'boxed',
+    overlay: false,
+    big: false,
+    font: 'grotesk',
+    density: 'normal',
+    radius: 'soft',
+    metrics: 'rule',
+    defaultTheme: undefined,
+    reveal: false,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  showcase: {
+    hero: 'full-bleed',
+    overlay: true,
+    big: true,
+    font: 'grotesk',
+    density: 'airy',
+    radius: 'soft',
+    metrics: 'bold',
+    defaultTheme: 'dark',
+    reveal: false,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  paper: {
+    hero: 'split',
+    overlay: false,
+    big: false,
+    font: 'serif',
+    density: 'tight',
+    radius: 'sharp',
+    metrics: 'inline',
+    defaultTheme: undefined,
+    reveal: false,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  gallery: {
+    hero: 'full-bleed',
+    overlay: false,
+    big: true,
+    font: 'grotesk',
+    density: 'normal',
+    radius: 'soft',
+    metrics: 'rule',
+    defaultTheme: undefined,
+    reveal: false,
+    galleryFirst: true,
+    lightbox: true,
+    galleryVariant: 'masonry',
+  },
+  motion: {
+    hero: 'boxed',
+    overlay: false,
+    big: false,
+    font: 'grotesk',
+    density: 'normal',
+    radius: 'soft',
+    metrics: 'rule',
+    defaultTheme: undefined,
+    reveal: true,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+} as const;
+
+const preset = PRESETS[activePreset];
+const theme = data.theme ?? {};
+
+const font = theme.font ?? preset.font;
+const density = theme.density ?? preset.density;
+const radius = theme.radius ?? preset.radius;
+const frameTheme = data.forceTheme ?? preset.defaultTheme;
+
+const frameClasses = [
+  'case-frame',
+  'min-h-dvh',
+  'pb-24',
+  `font-display-${font}`,
+  `density-${density}`,
+  `radius-${radius}`,
+].join(' ');
+
+const styleParts: string[] = [];
+if (theme.accent) styleParts.push(`--accent-o:${theme.accent}`);
+if (theme.accentDark) styleParts.push(`--accent-do:${theme.accentDark}`);
+if (theme.surface) styleParts.push(`--surface-o:${theme.surface}`);
+const frameStyle = styleParts.join(';');
+
+const reveal = preset.reveal;
+const hasGallery = data.gallery.length > 0;
+
+const mdxComponents = {
+  Figure,
+  FullBleed,
+  Split,
+  Gallery,
+  Metrics,
+  PullQuote,
+  SectionLabel,
+  ScrollParallax,
+  Compare,
+};
+---
+
+<article class={frameClasses} style={frameStyle} data-theme={frameTheme}>
+  <CaseHero
+    title={data.title}
+    role={data.role}
+    timeframe={data.timeframe}
+    teamSize={data.teamSize}
+    summary={data.summary}
+    image={data.heroImage}
+    alt={data.heroAlt}
+    links={data.links}
+    variant={preset.hero}
+    overlay={preset.overlay}
+    big={preset.big}
+  />
+
+  {
+    data.results.length > 0 && (
+      <div class="mx-auto mt-14 max-w-6xl px-6" data-reveal={reveal ? 'out' : undefined}>
+        <Metrics items={data.results} variant={preset.metrics} />
+      </div>
+    )
+  }
+
+  {
+    preset.galleryFirst && hasGallery && (
+      <Gallery
+        images={data.gallery}
+        variant={preset.galleryVariant}
+        lightbox={preset.lightbox}
+        reveal={reveal}
+      />
+    )
+  }
+
+  <div class="prose mx-auto mt-16 measure px-6">
+    <Content components={mdxComponents} />
+  </div>
+
+  {
+    data.contributions.length > 0 && (
+      <section class="mx-auto mt-20 max-w-2xl px-6" data-reveal={reveal ? 'out' : undefined}>
+        <h2 class="font-display text-2xl text-ink">My contributions</h2>
+        <ul class="mt-5 space-y-2.5 text-muted">
+          {data.contributions.map((c) => (
+            <li class="flex gap-3">
+              <span class="text-accent" aria-hidden="true">
+                —
+              </span>
+              <span>{c}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <div class="mx-auto mt-24 max-w-6xl px-6">
+    <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">← All work</a>
+  </div>
+</article>
+
+{reveal && <RevealInit />}

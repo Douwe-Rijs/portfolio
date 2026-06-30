@@ -11,16 +11,17 @@ interface Props {
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  noindex?: boolean;
 }
 
-const { title, description, image, type } = Astro.props;
+const { title, description, image, type, noindex } = Astro.props;
 const enableAnalytics = import.meta.env.PROD && import.meta.env.PUBLIC_ENABLE_ANALYTICS !== 'false';
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead {title} {description} {image} {type} />
+    <BaseHead {title} {description} {image} {type} {noindex} />
     <ClientRouter />
     {/* Set theme before paint to avoid a flash of the wrong theme. */}
     <script is:inline>

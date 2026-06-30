@@ -4,6 +4,7 @@ summary: 'A vision-only autonomy stack for a Parrot Bebop 2 that avoids obstacle
 role: 'Perception & Integration'
 timeframe: 'Spring 2026'
 teamSize: 8
+preset: 'paper'
 contributions:
   - 'Built the bottom-camera CyberZoo border detector (green safe-area and texture masking) so the drone could stay in bounds without external motion capture.'
   - 'Implemented the vertical-line (Hough) detector in the multi-layer obstacle stack — Canny edges and a probabilistic Hough transform filtered to solid vertical obstacles.'
@@ -36,16 +37,20 @@ results:
 gallery:
   - src: '../../assets/projects/autonomous-drone-mav/obstacle-perception.jpg'
     alt: 'Six-panel view of the multi-layer obstacle detector: CLAHE-normalised input, Hough vertical-line edges, orange-pole mask, sparse optical-flow vectors, green-ground disruption scores, and the fused per-column danger map with recommended safe gaps.'
-    caption: 'The multi-layer obstacle detector fuses five classical-vision cues into one per-column danger map and a ranked list of safe gaps.'
+    caption: 'Multi-layer obstacle detector — five cues fused into one danger map.'
   - src: '../../assets/projects/autonomous-drone-mav/system-architecture.jpg'
     alt: 'Block diagram: front and bottom cameras feed gate, multi-layer obstacle and border detectors, which feed a state machine driving Normal, Gate Approach, Gate Coast and Avoid Border control states.'
-    caption: 'Perception modules feed a state machine that arbitrates between obstacle avoidance, gate approach and boundary keeping.'
+    caption: 'Perception modules feeding the control state machine.'
   - src: '../../assets/projects/autonomous-drone-mav/parrot-bebop.jpg'
     alt: 'A Parrot Bebop 2 quadcopter with a red body and black bumpers, the platform used for the project.'
-    caption: 'The platform: a Parrot Bebop 2 with front and bottom cameras and an onboard ARM processor.'
+    caption: 'The Parrot Bebop 2 platform.'
 status: 'published'
 publishedDate: 2026-06-30
 ---
+
+import obstacle from '../../assets/projects/autonomous-drone-mav/obstacle-perception.jpg';
+import architecture from '../../assets/projects/autonomous-drone-mav/system-architecture.jpg';
+import bebop from '../../assets/projects/autonomous-drone-mav/parrot-bebop.jpg';
 
 ## Overview
 
@@ -55,6 +60,18 @@ had to explore the **CyberZoo** test arena, avoid the obstacles placed in it, an
 — for bonus points — fly through a racing gate. The hard constraint: everything
 had to run **on the drone's own ARM processor**, using only its front and bottom
 cameras. No external motion capture, no off-board compute.
+
+<Split src={bebop} alt="A Parrot Bebop 2 quadcopter with a red body and black bumpers, the platform used for the project." caption="Fig. 1 — The platform: a Parrot Bebop 2 with front and bottom cameras and an onboard ARM processor." reverse>
+
+### The platform
+
+The Bebop is small, light and inherently safe to fly indoors — but that agility
+comes at the cost of sensing and compute. Two cameras (one forward, one down) and
+a modest onboard processor were the entire perception budget. Every algorithm we
+shipped had to share that processor with the flight controller and still leave
+headroom for stable flight.
+
+</Split>
 
 ## The problem
 
@@ -89,6 +106,14 @@ invested in a layered **classical-vision** stack:
   relying on external positioning.
 - An **optical-flow velocity estimator** to move toward OptiTrack-free flight.
 
+<Figure
+  src={obstacle}
+  alt="Six-panel view of the multi-layer obstacle detector: CLAHE-normalised input, Hough vertical-line edges, orange-pole mask, sparse optical-flow vectors, green-ground disruption scores, and the fused per-column danger map with recommended safe gaps."
+  figNumber="2"
+  caption="The multi-layer obstacle detector fuses five classical-vision cues into one per-column danger map and a ranked list of safe gaps."
+  widths={[768, 1280, 1920]}
+/>
+
 ## Technical architecture
 
 The deployed pipeline is organised as a **state machine** over the perception
@@ -99,12 +124,25 @@ carry through once the gate leaves the field of view. A detected boundary
 overrides everything and triggers _Avoid Border_. Control outputs are smoothed
 with a moving-average window to damp erratic behaviour.
 
+<Figure
+  src={architecture}
+  alt="Block diagram: front and bottom cameras feed gate, multi-layer obstacle and border detectors, which feed a state machine driving Normal, Gate Approach, Gate Coast and Avoid Border control states."
+  figNumber="3"
+  caption="Perception modules feed a state machine that arbitrates between obstacle avoidance, gate approach and boundary keeping."
+  widths={[768, 1280, 1920]}
+/>
+
 ## Engineering for the compute budget
 
 The defining challenge was latency. The full fused pipeline ran at just **0.6
 FPS** on the Bebop — far too slow, and exactly the cause of the wobbling we saw
 in early flight tests. We responded on two fronts: profile-and-optimise, and
 prefer the simplest module that is robust enough.
+
+<PullQuote cite="Project retrospective">
+  The full fused pipeline ran at 0.6 FPS. Profiling — not intuition — found the one line that was
+  costing us the flight.
+</PullQuote>
 
 The clearest win was the velocity estimator. Its first implementation took
 **300 ms per frame**. Primitive on-drone profiling pinpointed a single culprit —

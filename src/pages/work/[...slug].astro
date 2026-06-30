@@ -1,7 +1,7 @@
 ---
-import { getCollection, render } from 'astro:content';
-import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import CaseStudy from '@/components/case/CaseStudy.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects', (p) => p.data.status === 'published');
@@ -10,120 +10,11 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { data } = project;
-const { Content } = await render(project);
 
 const seoTitle = data.seo?.title ?? data.title;
 const seoDesc = data.seo?.description ?? data.summary;
 ---
 
 <BaseLayout title={seoTitle} description={seoDesc} type="article">
-  <article>
-    <header class="mx-auto max-w-6xl px-6 pt-16 sm:pt-24">
-      <div class="flex items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase">
-        <span>{data.role}</span>
-        <span aria-hidden="true">·</span>
-        <span>{data.timeframe}</span>
-        {data.teamSize && <span aria-hidden="true">·</span>}
-        {data.teamSize && <span>{`Team of ${data.teamSize}`}</span>}
-      </div>
-      <h1 class="mt-4 display-lg text-ink">{data.title}</h1>
-      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">{data.summary}</p>
-
-      {
-        (data.links.repo || data.links.demo || data.links.paper) && (
-          <div class="mt-6 flex flex-wrap gap-5 text-sm">
-            {data.links.demo && (
-              <a class="text-accent underline-offset-4 hover:underline" href={data.links.demo}>
-                Live demo ↗
-              </a>
-            )}
-            {data.links.repo && (
-              <a class="text-ink underline-offset-4 hover:underline" href={data.links.repo}>
-                Repository ↗
-              </a>
-            )}
-            {data.links.paper && (
-              <a class="text-ink underline-offset-4 hover:underline" href={data.links.paper}>
-                Paper ↗
-              </a>
-            )}
-          </div>
-        )
-      }
-    </header>
-
-    <div class="mx-auto mt-12 max-w-6xl px-6">
-      <Image
-        src={data.heroImage}
-        alt={data.heroAlt}
-        widths={[640, 1024, 1600]}
-        sizes="100vw"
-        loading="eager"
-        class="w-full rounded-2xl border border-line object-cover"
-      />
-    </div>
-
-    {
-      data.results.length > 0 && (
-        <dl class="mx-auto mt-14 grid max-w-6xl grid-cols-2 gap-8 px-6 sm:grid-cols-4">
-          {data.results.map((r) => (
-            <div class="border-l border-line pl-4">
-              <dt class="font-mono text-xs tracking-wider text-muted uppercase">{r.label}</dt>
-              <dd class="mt-1 font-display text-2xl text-ink">{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )
-    }
-
-    <div class="prose mx-auto mt-16 max-w-2xl px-6">
-      <Content />
-    </div>
-
-    {
-      data.contributions.length > 0 && (
-        <section class="mx-auto mt-20 max-w-2xl px-6">
-          <h2 class="font-display text-2xl text-ink">My contributions</h2>
-          <ul class="mt-5 space-y-2.5 text-muted">
-            {data.contributions.map((c) => (
-              <li class="flex gap-3">
-                <span class="text-accent" aria-hidden="true">
-                  —
-                </span>
-                <span>{c}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
-
-    {
-      data.gallery.length > 0 && (
-        <section class="mx-auto mt-20 max-w-6xl px-6">
-          <div class="grid gap-6 sm:grid-cols-2">
-            {data.gallery.map((g) => (
-              <figure>
-                <Image
-                  src={g.src}
-                  alt={g.alt}
-                  widths={[480, 800, 1200]}
-                  sizes="(min-width: 640px) 50vw, 100vw"
-                  loading="lazy"
-                  class="w-full rounded-xl border border-line object-cover"
-                />
-                {g.caption && (
-                  <figcaption class="mt-2 font-mono text-xs text-muted">{g.caption}</figcaption>
-                )}
-              </figure>
-            ))}
-          </div>
-        </section>
-      )
-    }
-
-    <div class="mx-auto mt-24 max-w-6xl px-6">
-      <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">← All work</a>
-    </div>
-  </article>
+  <CaseStudy project={project} />
 </BaseLayout>

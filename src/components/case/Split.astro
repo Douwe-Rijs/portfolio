@@ -1,0 +1,54 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+/**
+ * Side-by-side image + prose. The backbone of the `editorial` rhythm: alternate
+ * `reverse` to weave imagery through the narrative instead of stacking it. Text
+ * is passed via the default slot; on large screens it can stay sticky while the
+ * image scrolls.
+ */
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Put the image on the right instead of the left. */
+  reverse?: boolean;
+  /** Keep the text column sticky on large screens. */
+  sticky?: boolean;
+  widths?: number[];
+  reveal?: boolean;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  reverse = false,
+  sticky = false,
+  widths = [480, 800, 1100],
+  reveal = false,
+} = Astro.props;
+---
+
+<div
+  class="not-prose my-[var(--rhythm)] grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
+  data-reveal={reveal ? 'out' : undefined}
+>
+  <figure class={reverse ? 'lg:order-2' : ''}>
+    <Image
+      src={src}
+      alt={alt}
+      widths={widths}
+      sizes="(min-width: 1024px) 50vw, 100vw"
+      loading="lazy"
+      class="w-full rounded-token border border-line object-cover"
+    />
+    {caption && <figcaption class="mt-3 font-mono text-xs text-muted">{caption}</figcaption>}
+  </figure>
+  <div class={`${reverse ? 'lg:order-1' : ''} ${sticky ? 'lg:sticky lg:top-28' : ''}`}>
+    <div class="prose">
+      <slot />
+    </div>
+  </div>
+</div>
