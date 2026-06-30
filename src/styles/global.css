@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /* Self-hosted variable fonts (perf + GDPR: no third-party CDN calls). */
-@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/space-grotesk';
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 
@@ -10,16 +10,16 @@
 
 /* --- Design tokens ---------------------------------------------------------
    Restrained, editorial palette: ink on warm paper / off-white on charcoal.
-   A single cobalt accent. Everything is a CSS variable so re-theming (and the
-   light/dark switch) is instant. Default accent is provisional — finalised in
-   the design-system milestone with live previews. */
+   A single botanical-green accent (chosen in the design-system milestone).
+   Everything is a CSS variable so re-theming (and the light/dark switch) is
+   instant. */
 :root {
   --base: #faf9f6; /* warm paper */
   --surface: #f1efe9;
   --ink: #14151a; /* near-black ink */
   --muted: #5b5e66;
   --line: #e4e1d9;
-  --accent: #2f54eb; /* cobalt */
+  --accent: #15803d; /* botanical green */
   --on-accent: #ffffff;
 }
 
@@ -29,12 +29,12 @@
   --ink: #f4f3ef;
   --muted: #a3a7af;
   --line: #24272d;
-  --accent: #7d97ff;
+  --accent: #4ade80;
   --on-accent: #0b0c0e;
 }
 
 @theme inline {
-  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
 

@@ -30,10 +30,10 @@ Framer / Awwwards-winning sites:
 - ✅ Editorial, image-driven, **case-study-led**. Images occupy 40–70% of the
   viewport on project pages — never tiny thumbnails.
 - ✅ **Typography creates interest before colour.** Large headings, clear
-  hierarchy, generous line-height. Display serif (Fraunces) + grotesque (Inter)
-  - mono (JetBrains Mono).
-- ✅ **Restrained palette, one accent.** Composition, spacing and photography
-  lead; colour supports. All colours are CSS variable tokens.
+  hierarchy, generous line-height. Display grotesque (Space Grotesk) + body sans
+  (Inter) + mono (JetBrains Mono).
+- ✅ **Restrained palette, one accent** (botanical green). Composition, spacing
+  and photography lead; colour supports. All colours are CSS variable tokens.
 - ✅ **Premium, purposeful motion**: smooth scroll, tasteful fades, image
   reveals, staggered loads, subtle parallax, microinteractions. Motion guides
   attention; never gimmicky. **Always respect `prefers-reduced-motion`.**

@@ -37,26 +37,26 @@ the semantic utilities so theming and dark mode stay free.
 | `--ink`       | `#14151a` | `#f4f3ef` | Primary text / headings                 |
 | `--muted`     | `#5b5e66` | `#a3a7af` | Secondary text, labels                  |
 | `--line`      | `#e4e1d9` | `#24272d` | Borders, hairlines                      |
-| `--accent`    | `#2f54eb` | `#7d97ff` | Links, emphasis, data accents           |
+| `--accent`    | `#15803d` | `#4ade80` | Links, emphasis, data accents           |
 | `--on-accent` | `#ffffff` | `#0b0c0e` | Text/!icons on an accent fill           |
 
 Tailwind utilities: `bg-base`, `bg-surface`, `text-ink`, `text-muted`,
 `border-line`, `text-accent`, `bg-accent`, `text-on-accent`.
 
-> **Accent is provisional.** Cobalt is the default; alternatives under review are
-> warm amber/ochre and deep botanical green / oxblood. Finalised in the
-> design-system milestone with live previews. Because everything is tokenised, a
-> re-skin is a few variable edits.
+> **Accent: botanical green** (chosen in the design-system milestone via live
+> side-by-side previews). Calm, bespoke and deliberately non-techy — it lets the
+> imagery and typography lead. Alternatives considered: cobalt, warm ochre and
+> oxblood. Because everything is tokenised, a re-skin is a few variable edits.
 
 ## 3. Typography
 
 Self-hosted variable fonts (Fontsource) — performance + GDPR (no Google CDN).
 
-| Role            | Family                                        | Utility / var         |
-| :-------------- | :-------------------------------------------- | :-------------------- |
-| Display/Heading | **Fraunces Variable** (serif, optical sizing) | `font-display`        |
-| Body/UI         | **Inter Variable**                            | default (`font-sans`) |
-| Technical/Mono  | **JetBrains Mono Variable**                   | `font-mono`           |
+| Role            | Family                                           | Utility / var         |
+| :-------------- | :----------------------------------------------- | :-------------------- |
+| Display/Heading | **Space Grotesk Variable** (geometric grotesque) | `font-display`        |
+| Body/UI         | **Inter Variable**                               | default (`font-sans`) |
+| Technical/Mono  | **JetBrains Mono Variable**                      | `font-mono`           |
 
 - Fluid display sizes via `clamp()`: `display-xl` (hero) and `display-lg`
   (page/section titles) utilities. Headings use tight tracking (`-0.02em`) and
