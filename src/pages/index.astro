@@ -1,30 +1,56 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
-import { SITE } from '@/consts';
+import { SITE, SOCIALS } from '@/consts';
 
 const projects = (await getCollection('projects', (p) => p.data.status === 'published')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 const featured = projects.filter((p) => p.data.featured);
-const showcase = (featured.length > 0 ? featured : projects).slice(0, 4);
+const ranked = featured.length > 0 ? featured : projects;
+const [lead, ...rest] = ranked;
+const moreProjects = rest.slice(0, 4);
 
-const focus = ['Perception', 'Planning', 'Control', 'ML systems'];
+const linkedin = SOCIALS.find((s) => s.label === 'LinkedIn');
+
+const focus = [
+  {
+    title: 'Perception',
+    body: 'Extracting structure from noisy camera, lidar and IMU data — detection, tracking and state estimation that hold up outside the lab.',
+  },
+  {
+    title: 'Planning',
+    body: 'Turning goals into safe, feasible motion under uncertainty and tight onboard compute budgets.',
+  },
+  {
+    title: 'Control',
+    body: 'Closing the loop reliably on real hardware — from classical controllers to learned policies.',
+  },
+  {
+    title: 'ML systems',
+    body: 'Machine learning that actually ships: data, training and deployment under real-world constraints.',
+  },
+];
 ---
 
 <BaseLayout>
-  <section class="mx-auto max-w-6xl px-6 pt-20 pb-16 sm:pt-28">
-    <p class="font-mono text-sm tracking-[0.2em] text-muted uppercase">{SITE.role}</p>
-    <h1 class="mt-6 max-w-[15ch] display-xl text-ink">
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28">
+    <p class="animate-rise font-mono text-sm tracking-[0.2em] text-muted uppercase">{SITE.role}</p>
+    <h1 class="mt-6 max-w-[16ch] animate-rise display-xl text-ink" style="animation-delay:80ms">
       Machines that perceive, decide, and act in the real world.
     </h1>
-    <p class="mt-8 max-w-2xl text-lg leading-relaxed text-muted">
+    <p
+      class="mt-8 max-w-2xl animate-rise text-lg leading-relaxed text-muted"
+      style="animation-delay:160ms"
+    >
       MSc Robotics at TU Delft and R&amp;D at Allseas. I work across the autonomy stack —
       perception, planning, and control — turning noisy, real-world signals into systems that hold
       up outside the lab.
     </p>
-    <div class="mt-10 flex flex-wrap items-center gap-5">
+    <div class="mt-10 flex animate-rise flex-wrap items-center gap-5" style="animation-delay:240ms">
       <a
         href="/work"
         class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity hover:opacity-90"
@@ -33,39 +59,154 @@ const focus = ['Perception', 'Planning', 'Control', 'ML systems'];
       </a>
       <a href="/about" class="text-sm text-ink underline-offset-4 hover:underline">About me →</a>
     </div>
+    <p
+      class="mt-16 animate-rise border-t border-line pt-8 font-mono text-sm text-muted"
+      style="animation-delay:320ms"
+    >
+      MSc Robotics, TU Delft
+      <span class="px-2 opacity-40" aria-hidden="true">/</span>
+      R&amp;D Engineer, Allseas
+      <span class="px-2 opacity-40" aria-hidden="true">/</span>
+      Perception · Planning · Control
+    </p>
   </section>
 
-  <section class="mx-auto max-w-6xl border-t border-line px-6 py-12">
-    <ul class="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
-      {
-        focus.map((f, i) => (
-          <li>
-            <span class="font-mono text-sm text-muted">0{i + 1}</span>
-            <p class="mt-2 font-display text-xl text-ink">{f}</p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section class="mx-auto max-w-6xl px-6 py-16">
-    <div class="flex items-end justify-between">
-      <h2 class="display-lg text-ink">Selected work</h2>
-      <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">All projects →</a>
-    </div>
-    {
-      showcase.length > 0 ? (
-        <div class="mt-12 grid gap-x-10 gap-y-16 sm:grid-cols-2">
-          {showcase.map((p, i) => (
-            <ProjectCard project={p} priority={i < 2} />
-          ))}
+  <!-- Featured project (lead story) -->
+  {
+    lead && (
+      <section class="border-t border-line">
+        <div class="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <div class="flex items-baseline justify-between">
+            <p class="font-mono text-xs tracking-[0.2em] text-muted uppercase">Featured project</p>
+            <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">
+              All work →
+            </a>
+          </div>
+          <a href={`/work/${lead.id}`} class="group mt-8 grid items-center gap-10 lg:grid-cols-12">
+            <div class="overflow-hidden rounded-2xl border border-line bg-surface lg:col-span-7">
+              <Image
+                src={lead.data.heroImage}
+                alt={lead.data.heroAlt}
+                widths={[640, 1024, 1400]}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                loading="eager"
+                class="aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
+            </div>
+            <div class="lg:col-span-5">
+              <div class="flex items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase">
+                <span>{lead.data.role}</span>
+                <span aria-hidden="true">·</span>
+                <span>{lead.data.timeframe}</span>
+              </div>
+              <h2 class="mt-3 display-lg text-ink">{lead.data.title}</h2>
+              <p class="mt-4 text-muted">{lead.data.summary}</p>
+              {lead.data.results.length > 0 && (
+                <dl class="mt-6 grid grid-cols-2 gap-5">
+                  {lead.data.results.slice(0, 4).map((r) => (
+                    <div class="border-l border-line pl-3">
+                      <dt class="font-mono text-[0.65rem] tracking-wider text-muted uppercase">
+                        {r.label}
+                      </dt>
+                      <dd class="mt-0.5 font-display text-lg text-ink">{r.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              <span class="mt-7 inline-flex items-center gap-1 text-sm text-accent">
+                Read the case study
+                <span class="transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+                  →
+                </span>
+              </span>
+            </div>
+          </a>
         </div>
-      ) : (
-        <p class="mt-8 max-w-prose text-lg text-muted">
-          Case studies are being prepared — the first, an autonomous micro-air-vehicle built at TU
-          Delft’s MAVLab, lands here shortly.
+      </section>
+    )
+  }
+
+  <!-- Focus areas -->
+  <section class="border-t border-line">
+    <div class="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+      <h2 class="display-lg text-ink">What I work on</h2>
+      <div class="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          focus.map((f, i) => (
+            <div>
+              <span class="font-mono text-sm text-accent">0{i + 1}</span>
+              <h3 class="mt-3 font-display text-xl text-ink">{f.title}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{f.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- More work (only when extra projects exist) -->
+  {
+    moreProjects.length > 0 && (
+      <section class="border-t border-line">
+        <div class="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+          <div class="flex items-end justify-between">
+            <h2 class="display-lg text-ink">More work</h2>
+            <a href="/work" class="text-sm text-muted transition-colors hover:text-ink">
+              All projects →
+            </a>
+          </div>
+          <div class="mt-12 grid gap-x-10 gap-y-16 sm:grid-cols-2">
+            {moreProjects.map((p, i) => (
+              <ProjectCard project={p} priority={i < 2} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Approach -->
+  <section class="border-t border-line">
+    <div class="mx-auto grid max-w-6xl gap-10 px-6 py-20 sm:py-24 lg:grid-cols-12">
+      <h2 class="display-lg text-ink lg:col-span-4">Approach</h2>
+      <div class="max-w-2xl lg:col-span-8">
+        <p class="text-lg leading-relaxed text-muted">
+          I’m drawn to the messy gap between a clean algorithm and a system that works outside the
+          lab — where sensors are noisy, compute is scarce and the world refuses to match the
+          assumptions. I prototype quickly, measure before optimising, and prefer the simplest
+          solution that is genuinely robust.
         </p>
-      )
-    }
+        <a
+          href="/about"
+          class="mt-6 inline-block text-ink underline underline-offset-4 hover:text-accent"
+        >
+          More about me →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="border-t border-line">
+    <div class="mx-auto max-w-6xl px-6 py-24 text-center sm:py-32">
+      <h2 class="mx-auto max-w-[20ch] display-lg text-ink">
+        Open to MSc thesis placements and robotics &amp; ML roles.
+      </h2>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-5">
+        <a
+          href="/contact"
+          class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity hover:opacity-90"
+        >
+          Get in touch
+        </a>
+        {
+          linkedin && (
+            <a href={linkedin.href} class="text-sm text-ink underline-offset-4 hover:underline">
+              LinkedIn →
+            </a>
+          )
+        }
+      </div>
+    </div>
   </section>
 </BaseLayout>
