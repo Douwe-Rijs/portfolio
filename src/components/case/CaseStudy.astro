@@ -20,7 +20,8 @@ import RevealInit from '@/components/case/RevealInit.astro';
  */
 interface Props {
   project: CollectionEntry<'projects'>;
-  presetOverride?: 'editorial' | 'showcase' | 'paper' | 'gallery' | 'motion';
+  /** Preview-only override; typed from the schema so it tracks the preset enum. */
+  presetOverride?: CollectionEntry<'projects'>['data']['preset'];
 }
 
 const { project, presetOverride } = Astro.props;
@@ -100,6 +101,70 @@ const PRESETS = {
     lightbox: false,
     galleryVariant: 'grid',
   },
+  // --- Additional vibes -------------------------------------------------------
+  // Composed from the same atoms, so no new rendering code is needed. These
+  // widen the range of "feels" a project can adopt and finally exercise the
+  // mono display font and the filmstrip gallery.
+  technical: {
+    // Engineering log: monospace headings, dark, tight, hard edges.
+    hero: 'boxed',
+    overlay: false,
+    big: false,
+    font: 'mono',
+    density: 'tight',
+    radius: 'sharp',
+    metrics: 'inline',
+    defaultTheme: 'dark',
+    reveal: false,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  minimal: {
+    // Whitespace-led: oversized type, airy rhythm, no rounded corners, no motion.
+    hero: 'boxed',
+    overlay: false,
+    big: true,
+    font: 'grotesk',
+    density: 'airy',
+    radius: 'sharp',
+    metrics: 'rule',
+    defaultTheme: undefined,
+    reveal: false,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  feature: {
+    // Magazine feature: warm serif, generous, soft round media, animated metrics.
+    hero: 'split',
+    overlay: false,
+    big: true,
+    font: 'serif',
+    density: 'airy',
+    radius: 'round',
+    metrics: 'bold',
+    defaultTheme: undefined,
+    reveal: true,
+    galleryFirst: false,
+    lightbox: false,
+    galleryVariant: 'grid',
+  },
+  brutalist: {
+    // Raw and bold: monospace, dark full-bleed hero, hard edges, filmstrip gallery.
+    hero: 'full-bleed',
+    overlay: true,
+    big: true,
+    font: 'mono',
+    density: 'normal',
+    radius: 'sharp',
+    metrics: 'bold',
+    defaultTheme: 'dark',
+    reveal: false,
+    galleryFirst: true,
+    lightbox: true,
+    galleryVariant: 'filmstrip',
+  },
 } as const;
 
 const preset = PRESETS[activePreset];
@@ -151,8 +216,8 @@ const mdxComponents = {
     image={data.heroImage}
     alt={data.heroAlt}
     links={data.links}
-    variant={preset.hero}
-    overlay={preset.overlay}
+    variant={data.heroLayout ?? preset.hero}
+    overlay={preset.overlay && !data.heroLayout}
     big={preset.big}
   />
 

@@ -4,15 +4,35 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import CaseStudy from '@/components/case/CaseStudy.astro';
 
 /**
- * Dev/preview-only route: renders the same MAV case study in each of the five
- * vibe presets so they can be compared side by side. Not linked from the site;
- * delete `src/pages/preview/` when no longer needed.
+ * Dev/preview-only route: renders the same MAV case study in each vibe preset
+ * so they can be compared side by side. Not linked from the site; delete
+ * `src/pages/preview/` when no longer needed.
  */
-const PRESETS = ['editorial', 'showcase', 'paper', 'gallery', 'motion'] as const;
+const PRESETS = [
+  'editorial',
+  'showcase',
+  'paper',
+  'gallery',
+  'motion',
+  'technical',
+  'minimal',
+  'feature',
+  'brutalist',
+] as const;
 type Preset = (typeof PRESETS)[number];
 
 export function getStaticPaths() {
-  return ['editorial', 'showcase', 'paper', 'gallery', 'motion'].map((preset) => ({
+  return [
+    'editorial',
+    'showcase',
+    'paper',
+    'gallery',
+    'motion',
+    'technical',
+    'minimal',
+    'feature',
+    'brutalist',
+  ].map((preset) => ({
     params: { preset },
   }));
 }

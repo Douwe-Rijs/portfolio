@@ -6,6 +6,12 @@ import ProjectCard from '@/components/ProjectCard.astro';
 const projects = (await getCollection('projects', (p) => p.data.status === 'published')).sort(
   (a, b) => a.data.order - b.data.order,
 );
+
+// Facets for the filter bar — derived from the published set so new projects
+// extend the filters automatically. Only worth showing once there's more than
+// one project and more than one category to choose between.
+const categories = [...new Set(projects.flatMap((p) => p.data.categories))].sort();
+const showFilter = projects.length > 1 && categories.length > 1;
 ---
 
 <BaseLayout
@@ -18,14 +24,46 @@ const projects = (await getCollection('projects', (p) => p.data.status === 'publ
       Case studies across perception, planning, control and ML systems — each one a real engineering
       problem with messy, real-world data.
     </p>
+
+    {
+      showFilter && (
+        <div
+          class="mt-10 flex flex-wrap gap-2"
+          role="group"
+          aria-label="Filter case studies by category"
+          data-filter-bar
+        >
+          <button
+            type="button"
+            class="rounded-full border border-line px-4 py-1.5 font-mono text-xs tracking-wider text-muted uppercase transition-colors hover:text-ink aria-pressed:border-accent aria-pressed:text-accent"
+            data-filter="all"
+            aria-pressed="true"
+          >
+            All
+          </button>
+          {categories.map((c) => (
+            <button
+              type="button"
+              class="rounded-full border border-line px-4 py-1.5 font-mono text-xs tracking-wider text-muted uppercase transition-colors hover:text-ink aria-pressed:border-accent aria-pressed:text-accent"
+              data-filter={c}
+              aria-pressed="false"
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )
+    }
   </section>
 
   <section class="mx-auto max-w-6xl px-6 pb-24">
     {
       projects.length > 0 ? (
-        <div class="grid gap-x-10 gap-y-16 sm:grid-cols-2">
+        <div class="grid gap-x-10 gap-y-16 sm:grid-cols-2" data-project-grid>
           {projects.map((p, i) => (
-            <ProjectCard project={p} priority={i < 2} />
+            <div data-project data-categories={p.data.categories.join('|')}>
+              <ProjectCard project={p} priority={i < 2} />
+            </div>
           ))}
         </div>
       ) : (
@@ -35,4 +73,28 @@ const projects = (await getCollection('projects', (p) => p.data.status === 'publ
       )
     }
   </section>
+
+  {
+    showFilter && (
+      <script is:inline>
+        {(() => {
+          const bar = document.querySelector('[data-filter-bar]');
+          if (!bar) return;
+          const cards = Array.from(document.querySelectorAll('[data-project]'));
+          bar.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-filter]');
+            if (!btn) return;
+            const active = btn.getAttribute('data-filter');
+            bar
+              .querySelectorAll('[data-filter]')
+              .forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+            cards.forEach((card) => {
+              const cats = (card.getAttribute('data-categories') || '').split('|');
+              card.hidden = !(active === 'all' || cats.includes(active));
+            });
+          });
+        })()}
+      </script>
+    )
+  }
 </BaseLayout>

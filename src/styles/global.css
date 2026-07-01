@@ -306,3 +306,51 @@
     }
   }
 }
+
+/* --- Print / "Save as PDF" ---------------------------------------------------
+   Turns any page (primarily the résumé) into a clean, ink-on-white document:
+   drop the chrome (nav, footer, skip link, the print button itself), force a
+   readable light palette regardless of theme, and keep sections from breaking
+   across pages. */
+@media print {
+  :root,
+  [data-theme='dark'] {
+    --base: #ffffff;
+    --surface-base: #ffffff;
+    --ink: #000000;
+    --muted: #333333;
+    --line: #cccccc;
+    --accent-base: #000000;
+  }
+
+  header,
+  footer,
+  #print-cv,
+  a[href='#main'] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  main {
+    padding: 0;
+  }
+
+  section {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}

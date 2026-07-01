@@ -1,0 +1,55 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', (p) => !p.data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { data } = post;
+const { Content } = await render(post);
+
+const dateFmt = new Intl.DateTimeFormat('en', { dateStyle: 'long' });
+
+// Roughly 200 words per minute reading time from the raw body.
+const words = post.body?.trim().split(/\s+/).length ?? 0;
+const readingMinutes = Math.max(1, Math.round(words / 200));
+---
+
+<BaseLayout title={data.title} description={data.description} type="article">
+  <article class="mx-auto max-w-3xl px-6 pt-20 pb-24 sm:pt-28">
+    <header>
+      <div
+        class="flex flex-wrap items-center gap-3 font-mono text-xs tracking-wider text-muted uppercase"
+      >
+        <time datetime={data.publishedDate.toISOString()}>
+          {dateFmt.format(data.publishedDate)}
+        </time>
+        <span aria-hidden="true">·</span>
+        <span>{readingMinutes} min read</span>
+      </div>
+      <h1 class="mt-4 display-lg text-ink">{data.title}</h1>
+      {
+        data.tags.length > 0 && (
+          <ul class="mt-5 flex flex-wrap gap-2">
+            {data.tags.map((t) => (
+              <li class="rounded-full border border-line px-2.5 py-1 font-mono text-xs text-muted">
+                {t}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="prose mt-12 measure">
+      <Content />
+    </div>
+
+    <div class="mt-20">
+      <a href="/blog" class="text-sm text-muted transition-colors hover:text-ink">← All writing</a>
+    </div>
+  </article>
+</BaseLayout>

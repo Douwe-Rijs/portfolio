@@ -7,6 +7,8 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   noindex?: boolean;
+  /** Extra JSON-LD graphs (e.g. CreativeWork, BreadcrumbList) for this page. */
+  structuredData?: Record<string, unknown>[];
 }
 
 const {
@@ -15,6 +17,7 @@ const {
   image = '/og-default.png',
   type = 'website',
   noindex = false,
+  structuredData = [],
 } = Astro.props;
 
 const pageTitle = title ? `${title} — ${SITE.name}` : SITE.title;
@@ -38,6 +41,12 @@ const personLd = {
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <meta name="generator" content={Astro.generator} />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={`${SITE.name} — Writing`}
+  href={new URL('rss.xml', site).href}
+/>
 
 <title>{pageTitle}</title>
 <meta name="description" content={description} />
@@ -63,3 +72,8 @@ const personLd = {
 <meta name="twitter:image" content={ogImage} />
 
 <script is:inline type="application/ld+json" set:html={JSON.stringify(personLd)} />
+{
+  structuredData.map((graph) => (
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(graph)} />
+  ))
+}

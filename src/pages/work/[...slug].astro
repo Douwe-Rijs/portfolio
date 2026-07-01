@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import CaseStudy from '@/components/case/CaseStudy.astro';
+import { SITE } from '@/consts';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects', (p) => p.data.status === 'published');
@@ -13,8 +14,44 @@ const { data } = project;
 
 const seoTitle = data.seo?.title ?? data.title;
 const seoDesc = data.seo?.description ?? data.summary;
+
+const site = Astro.site ?? new URL(SITE.url);
+const pageUrl = new URL(`/work/${project.id}`, site).href;
+const ogImage = `/og/projects/${project.id}.png`;
+
+// Structured data: describe the case study as a CreativeWork and give search
+// engines a breadcrumb trail (Home › Work › Project) for richer results.
+const creativeWorkLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: data.title,
+  headline: data.title,
+  description: data.summary,
+  url: pageUrl,
+  image: new URL(ogImage, site).href,
+  datePublished: data.publishedDate.toISOString(),
+  ...(data.updatedDate && { dateModified: data.updatedDate.toISOString() }),
+  keywords: [...data.tech, ...data.categories].join(', '),
+  author: { '@type': 'Person', name: SITE.name, url: SITE.url },
+};
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: site.href },
+    { '@type': 'ListItem', position: 2, name: 'Work', item: new URL('/work', site).href },
+    { '@type': 'ListItem', position: 3, name: data.title, item: pageUrl },
+  ],
+};
 ---
 
-<BaseLayout title={seoTitle} description={seoDesc} type="article">
+<BaseLayout
+  title={seoTitle}
+  description={seoDesc}
+  type="article"
+  image={ogImage}
+  structuredData={[creativeWorkLd, breadcrumbLd]}
+>
   <CaseStudy project={project} />
 </BaseLayout>

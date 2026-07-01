@@ -94,9 +94,12 @@ Full detail in `docs/CONTENT_PIPELINE.md`. To add a case study:
      `title, summary, role, timeframe, heroImage, heroAlt, publishedDate`.
    - **Pick a `preset`** (the project's "vibe") so each case study renders
      differently — `editorial` (default), `showcase` (big imagery, bold, dark),
-     `paper` (academic serif column), `gallery` (image-first + lightbox), or
-     `motion` (scroll reveals). Layer optional `theme{}` overrides (accent, font,
-     density, radius) and `forceTheme` on top.
+     `paper` (academic serif column), `gallery` (image-first + lightbox),
+     `motion` (scroll reveals), `technical` (mono engineering log, dark, dense),
+     `minimal` (whitespace + oversized type), `feature` (magazine serif + scroll
+     reveals), or `brutalist` (raw mono, dark full-bleed + filmstrip). Layer
+     optional `theme{}` overrides (accent, font, density, radius) and
+     `forceTheme` on top.
    - Copy the chosen images from staging into
      `src/assets/projects/<slug>/` and reference them in frontmatter/body.
    - Write the narrative in the MDX body using these sections, in order:

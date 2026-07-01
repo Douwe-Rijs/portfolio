@@ -16,6 +16,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "ingest": "python3 scripts/ingest.py",
+    "new:project": "node scripts/new-project.mjs",
+    "author": "node scripts/author.mjs",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -30,6 +32,7 @@
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
     "@astrojs/react": "^6.0.0",
+    "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/inter": "^5.2.8",
@@ -41,6 +44,8 @@
     "@types/react-dom": "^19.2.3",
     "@vercel/analytics": "^2.0.1",
     "astro": "^7.0.3",
+    "astro-og-canvas": "^0.13.0",
+    "canvaskit-wasm": "^0.41.1",
     "framer-motion": "^12.42.0",
     "react": "^19.2.7",
     "react-compare-slider": "^4.0.0",

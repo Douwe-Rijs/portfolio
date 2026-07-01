@@ -51,7 +51,34 @@ This writes `content/_staging/<slug>/`:
 Dependencies live in `scripts/requirements.txt` (each only needed for the
 formats you use). Install once: `pip install -r scripts/requirements.txt`.
 
+### Shortcut: ingest + AI hand-off in one command
+
+`npm run author -- <slug>` runs the ingest above, then prints a ready-to-paste
+prompt that tells an AI assistant to author the `.mdx` from the staging output.
+Use it when you have real sources and want the agent to write the story:
+
+```sh
+npm run author -- <slug>
+# extra flags pass through to ingest, e.g. --max-width 2000
+```
+
+It never calls an AI itself — it prepares staging and hands you the exact
+instruction, so the authoring step stays in your editor/chat for review.
+
 ## Step 3 — Author the case study
+
+**Scaffold fast (optional but recommended for batches).** To stub out one or many
+case studies at once — before you have any content — run:
+
+```bash
+npm run new:project -- <slug> [<slug> ...] [--preset <vibe>] [--title "…"]
+# e.g. npm run new:project -- lidar-fusion rrt-planner --preset technical
+```
+
+Each slug gets a schema-valid `status: draft` MDX wired to a shared placeholder
+hero (so `check`/`build` stay green with zero real assets) plus an empty
+`src/assets/projects/<slug>/` folder. Drafts never appear on the site, sitemap or
+RSS until you set `status: published`. Then fill in the frontmatter and body below.
 
 Create `src/content/projects/<slug>.mdx`. **Frontmatter** must satisfy the Zod
 schema in `src/content.config.ts`:
@@ -107,6 +134,10 @@ overrides on top.
 | `paper`     | academic, quiet, serif column | split      | serif   | none           |
 | `gallery`   | image-first, click-to-zoom    | full-bleed | grotesk | lazy lightbox  |
 | `motion`    | scroll reveals / parallax     | boxed      | grotesk | lazy IO island |
+| `technical` | engineering log, dark, dense  | boxed      | mono    | none           |
+| `minimal`   | whitespace, oversized type    | boxed      | grotesk | none           |
+| `feature`   | magazine feature, warm serif  | split      | serif   | scroll reveals |
+| `brutalist` | raw, bold, dark, filmstrip    | full-bleed | mono    | lazy lightbox  |
 
 Optional fine-grain overrides (all optional, layered over the preset):
 

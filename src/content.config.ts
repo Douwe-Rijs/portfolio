@@ -31,7 +31,19 @@ const projects = defineCollection({
        * type + palette + motion) so every case study can feel distinct while
        * sharing one accessible, token-based system. Unspecified → 'editorial'.
        */
-      preset: z.enum(['editorial', 'showcase', 'paper', 'gallery', 'motion']).default('editorial'),
+      preset: z
+        .enum([
+          'editorial',
+          'showcase',
+          'paper',
+          'gallery',
+          'motion',
+          'technical',
+          'minimal',
+          'feature',
+          'brutalist',
+        ])
+        .default('editorial'),
       /** Optional fine-grain token overrides layered on top of the preset. */
       theme: z
         .object({
@@ -44,8 +56,11 @@ const projects = defineCollection({
         })
         .partial()
         .optional(),
-      /** How the hero renders for this project. */
-      heroLayout: z.enum(['full-bleed', 'split', 'boxed']).default('boxed'),
+      /**
+       * Optional per-project override of the preset's hero layout. When unset,
+       * the hero variant is derived from the chosen `preset`.
+       */
+      heroLayout: z.enum(['full-bleed', 'split', 'boxed']).optional(),
       /** Pin the article frame to a theme regardless of the global toggle. */
       forceTheme: z.enum(['light', 'dark']).optional(),
       /** Optional secondary image (texture / accent / parallax layer). */
