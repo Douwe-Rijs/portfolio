@@ -1,0 +1,161 @@
+---
+title: 'A Live Physical Map of Every Switch Port'
+summary: 'A Grafana panel plugin rendering Cisco switches as live interactive front-panel images — colour-coded per port from SNMP, click to inspect — deployed fleet-wide on Allseas vessels.'
+role: 'R&D Engineer — Full-Stack'
+timeframe: '2024–2025 · Allseas'
+preset: 'showcase'
+skills:
+  - 'Grafana plugin development (React/TypeScript)'
+  - 'SNMP & LLDP data pipelines'
+  - 'SVG tooling & rendering'
+  - 'Automated CI/CD (Azure Pipelines)'
+  - 'Ship-board network infrastructure'
+takeaways:
+  - 'A physical metaphor (the actual front panel of the switch) makes per-port status readable at a glance — text tables cannot compete for quick fault-finding.'
+  - 'Auto-generating a fallback SVG from port metadata made the plugin work out-of-the-box on any switch, not just supported models.'
+  - 'The hardest part was not the visualisation but making the variable-binding work smoothly across Grafana versions without full page refreshes.'
+tech:
+  - 'React'
+  - 'TypeScript'
+  - 'Grafana'
+  - 'SNMP'
+  - 'Telegraf'
+  - 'Prometheus'
+  - 'MinIO'
+  - 'Azure Pipelines'
+  - 'Docker'
+categories:
+  - 'Software'
+  - 'Infrastructure'
+featured: true
+order: 2
+heroImage: '../../assets/projects/switch-port-visualiser/hero-2960c.jpg'
+heroAlt: 'Grafana dashboard showing a Cisco Catalyst 2960-C switch rendered as a photorealistic front-panel image, with live SNMP port data colour-coded red or green on each port and a port-information panel below showing throughput, VLAN and connected device.'
+links:
+  repo: 'https://dev.azure.com/Allseas/Innovations/_git/DLG_grafana_plugin_switch_panel'
+results:
+  - { label: 'Fleet-wide deployment', value: 'Live on vessels' }
+  - { label: 'Switch models supported', value: '14+ SVGs' }
+  - { label: 'SNMP + LLDP fields per port', value: '6 + 4' }
+  - { label: 'Fallback', value: 'Auto-generated' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import panelScreenshot from '../../assets/projects/switch-port-visualiser/panel-screenshot.jpg';
+import cisco29xx from '../../assets/projects/switch-port-visualiser/cisco-29xx-svg.png';
+import cisco37xx from '../../assets/projects/switch-port-visualiser/cisco-37xx-svg.png';
+import releasePipeline from '../../assets/projects/switch-port-visualiser/release-pipeline.png';
+
+## Overview
+
+When something goes wrong on a vessel's network — a dead port, unexpected
+VLAN, unknown device — the fastest way to diagnose it is to **see the
+physical switch**. This Grafana panel plugin does exactly that: it renders a
+photorealistic front-panel image of every Cisco switch in the fleet, overlays
+live **SNMP colour data** on each port (red = down, green = up), and opens a
+detail panel when you click any port — throughput, VLAN, operational and admin
+status, MAC address and the name of the connected device via LLDP/CDP.
+
+<FullBleed
+  src={panelScreenshot}
+  alt="Grafana Network Monitoring dashboard showing two stacked Cisco Catalyst 3750 switches rendered with live SNMP data. Most ports are coloured red indicating no link; a selected blue port shows port information below including 1.83 Mb/s throughput, VLAN 1, enabled admin status and the hostname of the connected device."
+  caption="Two Catalyst 3750 stacks in the live dashboard — every port coloured by status, selected port's data panel below."
+/>
+
+## The problem
+
+Before this plugin, network monitoring on Allseas vessels meant querying
+tables of interface names and numbers. Correlating a row like
+`GigabitEthernet2/0/49` to a physical port — and therefore to the cable and
+the device you actually need to reach — required cross-referencing manually.
+For a network team managing dozens of switches across operating vessels, that
+is an unnecessary friction at exactly the wrong time.
+
+The goal was to eliminate that friction: you look at the Grafana dashboard,
+you see the switch, you click the port that is lit red, and you immediately
+know the problem.
+
+## Architecture: SNMP → Telegraf → Prometheus → Grafana
+
+The data pipeline was already in place as part of Allseas' Datalogger
+infrastructure: **Telegraf** runs on the vessel cluster, queries every managed
+switch via **SNMP** at a configurable interval, and forwards the data to
+**Prometheus** (and a secondary copy to **MinIO** for historical storage). The
+plugin reads a Grafana table query over that data and maps it to the visual.
+
+Each port shows six SNMP fields — `ifDescr`, `vmVlan`, `ifOperStatus`,
+`ifAdminStatus`, `ifInOctets`, `ifOutOctets` — plus LLDP fields including the
+remote system name, description and chassis MAC. A Python sidecar running on
+the cluster watches the MinIO bucket and triggers data rotation when a new
+SNMP snapshot arrives.
+
+## The plugin: matching OIDs to switch images
+
+The visual requires knowing _which_ SVG image matches the switch in front of
+you. Every Cisco switch exposes its model OID via SNMP (`sysObjectID`). The
+plugin ships a **2,590-line OID-to-model mapping** (`switches.ts`) and a
+library of 14+ custom SVG images, each pre-processed through a **bespoke
+SVG-ID-assigner tool** (`svg-id-app`).
+
+<Split src={cisco37xx} alt="Photorealistic SVG of a Cisco Catalyst 3750 stack switch showing all 48 ports labelled and outlined in pink, ready for live data overlay." caption="A Catalyst 3750 SVG ready for the plugin: every port region has been manually assigned an ID in the SVG-ID assigner tool." reverse>
+
+The SVG-ID assigner solves a real problem: Cisco publishes Visio stencils for
+every switch, but their SVG exports have no port semantics. The web app lets
+you open the exported SVG, left-click each physical port shape in order, and
+export a `.csvg` file where every port region has a matching `port-N` ID — the
+handle the Grafana plugin needs to overlay colour and click handlers.
+
+</Split>
+
+<Split src={cisco29xx} alt="Photorealistic SVG of a Cisco Catalyst 2960 switch showing its 26 ports labelled and ready for live status colour overlay." caption="A 2960-series switch asset — each port outlined and ID-assigned, ready to receive live data.">
+
+When no model-specific SVG exists, the plugin **generates one from the port
+data itself**: it reads the port names from the SNMP data, infers the layout
+from the naming pattern (e.g. `GigabitEthernetX/Y` grids), and renders a
+plain canvas SVG at runtime. This means the plugin works on first boot for any
+switch, without needing a custom asset.
+
+</Split>
+
+## The release pipeline
+
+The plugin ships via an **Azure Pipelines CI/CD flow**: a pull request with a
+conventional commit message triggers a version bump, a Webpack build, a
+signed zip and an upload to MinIO — from where Grafana pulls the plugin on
+next restart. The `switch_panel` variable in Grafana selects the active switch
+by name (not MAC, after an early iteration that broke on stacked switches
+sharing a chassis ID), and `locationService.partial` updates the URL without
+triggering a full page refresh.
+
+<Figure
+  src={releasePipeline}
+  alt="Azure Pipelines flow diagram: create PR, check for conventional commit title, complete merge to release branch, build plugin, create semantic version tag, upload zip to MinIO."
+  figNumber="1"
+  caption="The release pipeline: conventional commits drive automatic versioning and deployment to Grafana via MinIO."
+/>
+
+## Results
+
+The plugin is **deployed fleet-wide on Allseas vessels** as part of the
+Datalogger stack. Network engineers can navigate to any switch by name, see
+every port's live status at a glance, and click through to throughput graphs
+and connected-device identity without leaving Grafana. Coverage spans 14+
+distinct Cisco switch models across Catalyst 2960, 3750 and 3750v2 families.
+
+Honest limits: the plugin reads SNMP on a polling interval, so it is
+near-realtime rather than instant. The SVG assets for new switch models
+require a one-time manual port-assignment pass through the SVG-ID assigner.
+
+## Lessons learned
+
+- **Physical metaphors beat data tables for operational dashboards.** The same
+  SNMP data that required table cross-referencing became instantly
+  interpretable once mapped to the switch's physical face.
+- **Edge-case handling enables fleet-wide deployment.** Auto-generated SVGs
+  meant no switch was left behind — a library of 14 images would not have
+  covered everything.
+- **Grafana internals reward learning the proper APIs.** Getting
+  `locationService.partial` right (not `window.location`, not a full
+  `replaceState`) eliminated a whole class of refresh and variable-sync bugs.
