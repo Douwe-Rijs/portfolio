@@ -20,6 +20,10 @@ const projects = defineCollection({
       timeframe: z.string(),
       teamSize: z.union([z.number(), z.string()]).optional(),
       contributions: z.array(z.string()).default([]),
+      /** Human skills exercised (broader than `tech`), shown in the at-a-glance panel. */
+      skills: z.array(z.string()).default([]),
+      /** 2–4 one-line takeaways ("what I learned"), shown near the top. */
+      takeaways: z.array(z.string()).default([]),
       tech: z.array(z.string()).default([]),
       categories: z.array(z.string()).default([]),
       featured: z.boolean().default(false),

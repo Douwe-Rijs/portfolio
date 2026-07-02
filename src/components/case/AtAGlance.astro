@@ -1,0 +1,54 @@
+---
+/**
+ * "At a glance" panel shown near the top of a case study: a ruled,
+ * editorial two-row table pairing the skills exercised with the headline
+ * takeaways. Gives recruiters the 10-second read before the narrative.
+ */
+interface Props {
+  skills: string[];
+  takeaways: string[];
+  tech?: string[];
+}
+
+const { skills, takeaways, tech = [] } = Astro.props;
+if (skills.length === 0 && takeaways.length === 0) return null;
+---
+
+<section aria-label="At a glance" class="mx-auto mt-14 max-w-6xl px-6">
+  <div class="border-y border-line">
+    {
+      skills.length > 0 && (
+        <div class="grid gap-3 border-b border-line py-5 sm:grid-cols-[11rem_1fr] sm:gap-8">
+          <h2 class="font-mono text-xs tracking-[0.2em] text-muted uppercase">Skills applied</h2>
+          <ul class="flex flex-wrap gap-x-2 gap-y-2">
+            {skills.map((s) => (
+              <li class="rounded-full border border-line px-3 py-1 text-sm text-ink">{s}</li>
+            ))}
+            {tech.map((t) => (
+              <li class="rounded-full border border-line px-3 py-1 font-mono text-xs text-muted">
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+    {
+      takeaways.length > 0 && (
+        <div class="grid gap-3 py-5 sm:grid-cols-[11rem_1fr] sm:gap-8">
+          <h2 class="font-mono text-xs tracking-[0.2em] text-muted uppercase">What I learned</h2>
+          <ol class="space-y-2.5">
+            {takeaways.map((t, i) => (
+              <li class="flex gap-4">
+                <span class="font-mono text-sm text-accent" aria-hidden="true">
+                  0{i + 1}
+                </span>
+                <span class="text-ink">{t}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )
+    }
+  </div>
+</section>

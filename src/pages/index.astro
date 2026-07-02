@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
+import ImageMarquee from '@/components/ImageMarquee.astro';
 import { SITE, SOCIALS } from '@/consts';
 
 const projects = (await getCollection('projects', (p) => p.data.status === 'published')).sort(
@@ -12,6 +13,12 @@ const featured = projects.filter((p) => p.data.featured);
 const ranked = featured.length > 0 ? featured : projects;
 const [lead, ...rest] = ranked;
 const moreProjects = rest.slice(0, 4);
+
+// Film-strip banner: sample each project's hero + one gallery image.
+const marqueeImages = projects.flatMap((p) => [
+  { src: p.data.heroImage, alt: p.data.heroAlt, href: `/work/${p.id}` },
+  ...p.data.gallery.slice(0, 1).map((g) => ({ src: g.src, alt: g.alt, href: `/work/${p.id}` })),
+]);
 
 const linkedin = SOCIALS.find((s) => s.label === 'LinkedIn');
 
@@ -37,8 +44,10 @@ const focus = [
 
 <BaseLayout>
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-6 pt-24 pb-20 sm:pt-32 sm:pb-28">
-    <p class="animate-rise font-mono text-sm tracking-[0.2em] text-muted uppercase">{SITE.role}</p>
+  <section class="mx-auto max-w-6xl px-6 pt-24 pb-16 sm:pt-32 sm:pb-20">
+    <p class="animate-rise font-mono text-sm tracking-[0.2em] text-muted uppercase">
+      Douwe Rijs — {SITE.role}
+    </p>
     <h1 class="mt-6 max-w-[16ch] animate-rise display-xl text-ink" style="animation-delay:80ms">
       Machines that perceive, decide, and act in the real world.
     </h1>
@@ -46,9 +55,9 @@ const focus = [
       class="mt-8 max-w-2xl animate-rise text-lg leading-relaxed text-muted"
       style="animation-delay:160ms"
     >
-      MSc Robotics at TU Delft and R&amp;D at Allseas. I work across the autonomy stack —
-      perception, planning, and control — turning noisy, real-world signals into systems that hold
-      up outside the lab.
+      I study Robotics at TU Delft and build R&amp;D prototypes at Allseas. My favourite part is the
+      messy gap where perception, planning and control meet the real world — drones, robots,
+      pipelines and the occasional hospital device. Here's some of that work.
     </p>
     <div class="mt-10 flex animate-rise flex-wrap items-center gap-5" style="animation-delay:240ms">
       <a
@@ -59,10 +68,27 @@ const focus = [
       </a>
       <a href="/about" class="text-sm text-ink underline-offset-4 hover:underline">About me →</a>
     </div>
-    <p
-      class="mt-16 animate-rise border-t border-line pt-8 font-mono text-sm text-muted"
-      style="animation-delay:320ms"
-    >
+  </section>
+
+  <!-- Project film strip -->
+  {
+    marqueeImages.length > 0 && (
+      <section
+        aria-label="Glimpses from the projects"
+        class="animate-rise"
+        style="animation-delay:320ms"
+      >
+        <ImageMarquee images={marqueeImages} duration={70} />
+        <p class="mx-auto max-w-6xl px-6 pt-3 pb-2 font-mono text-xs tracking-[0.2em] text-muted uppercase">
+          Scenes from the work — click any frame
+        </p>
+      </section>
+    )
+  }
+
+  <!-- Credibility strip -->
+  <section class="mx-auto max-w-6xl px-6">
+    <p class="mt-10 mb-16 font-mono text-sm text-muted sm:mb-20">
       MSc Robotics, TU Delft
       <span class="px-2 opacity-40" aria-hidden="true">/</span>
       R&amp;D Engineer, Allseas

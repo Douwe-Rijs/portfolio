@@ -7,6 +7,7 @@ import FullBleed from '@/components/case/FullBleed.astro';
 import Split from '@/components/case/Split.astro';
 import Gallery from '@/components/case/Gallery.astro';
 import Metrics from '@/components/case/Metrics.astro';
+import AtAGlance from '@/components/case/AtAGlance.astro';
 import PullQuote from '@/components/case/PullQuote.astro';
 import SectionLabel from '@/components/case/SectionLabel.astro';
 import ScrollParallax from '@/components/case/ScrollParallax.astro';
@@ -227,6 +228,14 @@ const mdxComponents = {
     data.results.length > 0 && (
       <div class="mx-auto mt-14 max-w-6xl px-6" data-reveal={reveal ? 'out' : undefined}>
         <Metrics items={data.results} variant={preset.metrics} />
+      </div>
+    )
+  }
+
+  {
+    (data.skills.length > 0 || data.takeaways.length > 0) && (
+      <div data-reveal={reveal ? 'out' : undefined}>
+        <AtAGlance skills={data.skills} takeaways={data.takeaways} tech={data.tech} />
       </div>
     )
   }
