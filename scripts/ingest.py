@@ -210,14 +210,22 @@ def ingest_pptx(path: Path, writer: ImageWriter, result: IngestResult) -> None:
                     continue
                 if shape.has_text_frame and shape.text_frame.text.strip():
                     texts.append(shape.text_frame.text.strip())
-                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                # Extract every embedded blip, not just PICTURE shapes —
+                # pictures dropped into content placeholders carry the same
+                # image data but report PLACEHOLDER as their shape type.
+                a_ns = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+                r_ns = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
+                for blip in shape._element.findall(f".//{a_ns}blip"):
+                    rid = blip.get(f"{r_ns}embed")
+                    if not rid:
+                        continue
                     img_index += 1
                     try:
-                        image = shape.image
+                        blob = slide.part.related_part(rid).blob
                     except Exception:
                         continue
                     asset = writer.write(
-                        image.blob,
+                        blob,
                         stem=f"{stem}-s{slide_index}-{img_index}",
                         source=path.name,
                         location=f"slide {slide_index}",

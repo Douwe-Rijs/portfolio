@@ -30,10 +30,10 @@ links:
   repo: 'https://github.com/Mumpaya/paparazzi'
   demo: 'https://youtu.be/Lsj26em1I9s'
 results:
-  - { label: 'Onboard throughput', value: '8–11 FPS' }
-  - { label: 'Velocity estimator', value: '300 → 55 ms' }
-  - { label: 'CNN classifier', value: '98% val. acc.' }
-  - { label: 'Team', value: '8 engineers' }
+  - { label: 'Onboard perception', value: '8–11 FPS' }
+  - { label: 'Velocity estimator, per frame', value: '300 → 55 ms' }
+  - { label: 'Fused pipeline before tuning', value: '0.6 FPS' }
+  - { label: 'CNN prototype (not deployed)', value: '98% val. acc.' }
 gallery:
   - src: '../../assets/projects/autonomous-drone-mav/obstacle-perception.jpg'
     alt: 'Six-panel view of the multi-layer obstacle detector: CLAHE-normalised input, Hough vertical-line edges, orange-pole mask, sparse optical-flow vectors, green-ground disruption scores, and the fused per-column danger map with recommended safe gaps.'

@@ -191,6 +191,26 @@ that use them** and all honour `prefers-reduced-motion`, so quiet presets stay
 
 Authoring rules:
 
+- **Metrics must be meaningful outcomes, not attributes.** A `results` chip
+  earns its place only if a recruiter can interpret it without reading the
+  report: a change (`~1% → ~80%`), a comparison (`−50% RMS error`), or a
+  concrete achievement (`clinically tested`). Never inputs, tool counts, team
+  size, parameter values or abstract counts ("climate signals per bed: 5",
+  "waypoints per edge: 100") — if a number needs the report to make sense, it
+  is not a result.
+- **Every number needs context.** Pair each figure with its baseline,
+  comparison or consequence in the surrounding sentence. A bare number is a
+  red flag.
+- **Lead with the finding that matters, not the material that was easiest to
+  extract.** Select figures by narrative importance: the graph that proves the
+  headline result belongs on the page. If the decisive figure wasn't extracted
+  (e.g. a native PPT chart), go back to the source and recover it rather than
+  substituting a weaker one.
+- **Weight the narrative by what made the project significant, not by report
+  chapter length.** A clinical device's story is ergonomics, user feedback and
+  the regulatory pathway more than its mechanical calculations; an R&D
+  pipeline's story is the accuracy jump and its diagnosis more than the tool
+  benchmark. Ask "what would the reader remember?" and give that the space.
 - **Curate images.** Copy only the strongest images from `_staging/<slug>/images/`
   into `src/assets/projects/<slug>/`, rename them meaningfully (`hero.jpg`,
   `pipeline.jpg`), and reference them with paths **relative to the `.mdx` file**

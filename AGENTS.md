@@ -106,6 +106,13 @@ Full detail in `docs/CONTENT_PIPELINE.md`. To add a case study:
      **Overview → Problem → Design decisions → Technical architecture →
      Challenges → Solutions → Results → Lessons learned**. Keep prose clear,
      concise, recruiter-appropriate, and **honest — never exaggerate**.
+   - **Editorial judgment rules** (full detail in `docs/CONTENT_PIPELINE.md`):
+     result chips must be interpretable outcomes (changes, comparisons,
+     achievements) — never inputs, counts or team size; every number needs its
+     baseline/consequence in context; pick figures by narrative importance
+     (recover the decisive graph from the source if extraction missed it);
+     weight sections by what made the project matter, not by report chapter
+     length.
    - **Stay image-centric:** weave imagery through the prose with the editorial
      kit in `src/components/case/` (`Figure`, `FullBleed`, `Split`, `Gallery`,
      `Metrics`, `PullQuote`, `SectionLabel`) plus interactive islands

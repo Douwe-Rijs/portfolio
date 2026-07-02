@@ -24,10 +24,10 @@ heroImage: '../../assets/projects/chemo-injection-device/cfi-prototype.jpg'
 heroAlt: 'The 3D-printed constant-force injector prototype: a black printed housing holding a BD Plastipak syringe with safety needle, driven by a white constant-force spring drum mounted on top.'
 links: {}
 results:
-  - { label: 'Nurse force replaced', value: '~30 N' }
-  - { label: 'Manual effort', value: '3–5 min → 0' }
-  - { label: 'Repeatability trials', value: '5/5 consistent' }
-  - { label: 'Clinical feedback', value: 'Hospital-tested' }
+  - { label: 'Sustained nurse force removed', value: '~30 N' }
+  - { label: 'Manual pressing per injection', value: '3–5 min → 0' }
+  - { label: 'Delivery consistency', value: '5/5 trials' }
+  - { label: 'Tested with clinicians at', value: 'Reinier de Graaf' }
 gallery: []
 status: 'published'
 publishedDate: 2026-07-02
@@ -47,45 +47,51 @@ TU Delft — in collaboration with **Reinier de Graaf Hospital** — our
 four-person team designed, built and validated a device that takes that load
 off the caregiver entirely: a 3D-printed **Constant Force Injector (CFI)**.
 
-## The problem, quantified
+## The ergonomic problem
 
-Before designing anything, we measured the job. A test rig — syringe, scale,
-collection bag and a honey–water mixture matched to the drug's estimated
-viscosity — showed a nurse must sustain roughly **3 kg (~30 N)** of plunger
-force to hit the target flow rate, for minutes at a time.
+This project is an ergonomics story before it is a mechanics story. A
+Daratumumab injection demands a pinch-grip force of roughly **3 kg (~30 N)**,
+held steadily for three to five minutes — and oncology nurses repeat that up to
+**five or more times a day**, day after day. That is a textbook recipe for
+repetitive strain injury in the hand, wrist and forearm, and it also makes the
+injection _worse for the patient_: a tiring hand delivers an uneven flow. We
+measured the job before designing for it, and the measurement makes the
+problem visible:
 
 <Figure
   src={forceTest}
   alt="Line chart of four manual injection force trials: scale readings fluctuate mostly between 2000 and 4000 grams over more than 200 seconds, with visible spikes and dips across all four tests."
   figNumber="1"
-  caption="Four manual-injection trials on the test rig: ~3 kg of sustained force, with the variability of a human hand plainly visible."
+  caption="Four manual-injection trials on the test rig: ~3 kg of force sustained for minutes, with the fatigue and variability of a human hand plainly visible in every trace."
   widths={[768, 1280]}
 />
 
-The physics backed the measurement: modelling the needle flow with the
-**Hagen–Poiseuille equation** put the required force in the 5–50 N range
-depending on tissue back-pressure, and a water-only validation run landed
-within half a second of theory (30.8 s measured vs 30.3 s predicted).
+A flow model (Hagen–Poiseuille, validated against a water test to within half
+a second) confirmed the target: the device had to replace a steady 30 N —
+comfortably inside a 5–50 N envelope depending on tissue back-pressure.
 
-## Design decisions
+## Designing with the clinic, not for it
 
-From a morphological analysis, two concepts were prototyped and taken to the
-hospital: an elastic assist ("Elastico") that supplements finger force, and the
-**CFI**, in which a pre-tensioned **constant-force spring** drives the plunger
-autonomously. Clinical feedback was decisive — the elastic concept was
-uncomfortable in exactly the way the current process is, while the CFI removed
-the effort altogether. The workflow: tension the spring with a lever, clamp the
-standard BD Luer-Lock syringe, insert the needle, release.
+From a morphological analysis, two concepts were prototyped and taken to
+**Reinier de Graaf Hospital**: an elastic assist ("Elastico") that supplements
+finger force, and the **CFI**, in which a pre-tensioned constant-force spring
+drives the plunger autonomously. The clinicians' verdict was the real design
+review — the elastic concept was uncomfortable in exactly the way the current
+process is, while the CFI **removed the effort altogether** while keeping the
+nurse in control: tension the spring with a lever, clamp the standard
+BD Luer-Lock syringe, insert the needle, release. Manual override remains
+possible throughout.
 
-<Split src={cfiImprovements} alt="The constant-force injector prototype with red annotations marking redesigned regions: the spring drum rim, the syringe clamp area and the trigger block on the housing side." caption="Clinical and bench feedback drove the redesign: click-and-twist syringe clamping, a spring-loaded hook replacing the fiddly pin, and graduation marks for visual rate feedback." reverse>
+<Split src={cfiImprovements} alt="The constant-force injector prototype with red annotations marking redesigned regions: the spring drum rim, the syringe clamp area and the trigger block on the housing side." caption="Every annotated change came from clinical or bench feedback: click-and-twist syringe clamping, a spring-loaded hook replacing the fiddly pin, and graduation marks for at-a-glance rate feedback." reverse>
 
-The refinement round is where the design matured: the syringe holder gained a
-**click-and-twist** clamp so the syringe cannot eject under load, the manual
-locking pin became a **spring-loaded hook** that locks automatically when
-tensioned, and graduation marks along the shaft let the nurse verify at a
-glance that the injection is proceeding at constant speed. Every part except
-the spring prints in PLA, with each component oriented so its maximum load runs
-perpendicular to the print layers.
+The refinements are ergonomics too, not detailing: the hospital asked for a
+button instead of a fiddly locking pin, so the pin became a **spring-loaded
+hook** that locks itself when tensioned; the syringe holder gained a
+**click-and-twist** clamp so the syringe cannot eject under load; and
+graduation marks along the shaft give the nurse the progress feedback
+clinicians explicitly requested — confirmation, at a glance, that the
+injection is running at constant speed. Everything except the spring prints in
+PLA, oriented so peak loads run perpendicular to the print layers.
 
 </Split>
 
@@ -114,24 +120,39 @@ theoretical), and the actual viscosity of Daratumumab is — remarkably —
 provide it, so our surrogate was calibrated to an estimate. The device works;
 its spring must be re-specified against the real drug.
 
-## Regulatory path
+## The regulatory pathway — as much a design input as the spring
 
-As a device intended for in-house hospital use, the CFI targets the **MDR
-Article 5.5** exemption — with its documentation, safety and post-market
-surveillance duties — rather than a commercial CE route. Sterilisation is the
-honest weak point: porous PLA degrades under repeated 70% ethanol cleaning,
-which caps the printed housing's life at roughly one to three years (about €2
-of material and 12 hours of printing to replace) and motivates resin printing
-or coatings as follow-up work.
+A device that touches chemotherapy administration lives or dies by the EU
+**Medical Device Regulation**, so the regulatory strategy was designed
+alongside the mechanism, not after it. The CFI deliberately targets the
+**Article 5.5 in-house exemption**: manufactured and used within the same
+hospital, it avoids the full commercial CE-marking route — but the exemption
+is not a shortcut. It still binds the hospital to the MDR's general safety and
+performance requirements, technical documentation, **post-market surveillance
+and vigilance**, and it comes with hard restrictions: the device may never be
+transferred to another legal entity, and the exemption only holds while no
+equivalent commercial device is available.
+
+Those rules shaped the hardware directly. Reusability implies repeated
+**70% ethanol sterilisation** — and porous PLA measurably degrades under it,
+capping the printed housing's service life at roughly one to three years
+against the spring's four-plus. The honest consequence: as designed, the CFI
+is an annually reprinted device (about €2 of material and 12 hours of print
+time), and moving to resin printing or sealed coatings is the first
+compliance-driven follow-up, not an aesthetic one. Complex internal geometry
+that is hard to disinfect thoroughly was flagged as a genuine contamination
+risk in the same analysis.
 
 ## Lessons learned
 
+- **Clinical feedback beats desk criteria.** The concept that scored well on
+  paper was rejected in minutes by the people who would use it — and the best
+  design changes (hook, clamp, progress marks) were all clinician requests.
+- **Regulation is a design input, not paperwork.** The MDR Article 5.5 route
+  and its sterilisation demands set the material constraints as firmly as any
+  load case.
 - **Measure the task before designing for it.** The 30 N figure anchored every
   downstream decision, from spring selection to FEM load cases.
-- **Clinical feedback beats desk criteria.** The concept that scored well on
-  paper was rejected in minutes by the people who would use it.
-- **Friction is a first-class design load.** The gap between theoretical and
-  actual delivery time was mostly mechanism friction — predictable in
-  hindsight, measured too late.
 - **Missing data is a finding.** That a drug's viscosity is unavailable even to
-  the hospital pharmacy defines the next iteration's first experiment.
+  the hospital pharmacy defines the next iteration's first experiment — and
+  explains the honest 7:55 vs 3–5 min gap.

@@ -27,10 +27,10 @@ heroImage: '../../assets/projects/pipe-text-recognition/hero-pipe-interior.jpg'
 heroAlt: 'Looking down the red-coated interior of a large pipeline pipe, ringed by white stencilled supplier and specification text, with a small bright opening at the far end.'
 links: {}
 results:
-  - { label: 'Exact-ID accuracy', value: '~80%' }
-  - { label: 'Starting point', value: '~1%' }
-  - { label: 'OCR engines benchmarked', value: '4' }
-  - { label: 'Capture', value: '360° camera' }
+  - { label: 'Exact pipe-ID accuracy', value: '~1% → ~80%' }
+  - { label: 'Gain from tighter crops', value: '29 → 59%' }
+  - { label: 'Best OCR of 4 benchmarked', value: 'PaddleOCR' }
+  - { label: 'ID always in frame via', value: '360° capture' }
 gallery: []
 status: 'published'
 publishedDate: 2026-07-02
@@ -41,6 +41,7 @@ import rustyPipe from '../../assets/projects/pipe-text-recognition/rusty-pipe-st
 import ocrEasy from '../../assets/projects/pipe-text-recognition/ocr-easyocr.jpg';
 import ocrPaddle from '../../assets/projects/pipe-text-recognition/ocr-paddleocr.jpg';
 import vlmChart from '../../assets/projects/pipe-text-recognition/vlm-comparison-chart.jpg';
+import obbChart from '../../assets/projects/pipe-text-recognition/obb-accuracy-chart.jpg';
 import yoloObb from '../../assets/projects/pipe-text-recognition/yolo-obb-detection.jpg';
 import barossa from '../../assets/projects/pipe-text-recognition/barossa-pipe.jpg';
 import craftHeatmap from '../../assets/projects/pipe-text-recognition/craft-heatmap.jpg';
@@ -120,7 +121,7 @@ Databricks cloud and the internal AI-lab server.
   src={vlmChart}
   alt="Bar chart comparing untuned VLMs on pipe-code extraction: gemma-3-12b reaches about 17% exact match, two llama-4-maverick variants about 29%, with average digit accuracy between 41% and 58%."
   figNumber="1"
-  caption="Untuned VLMs on pipe-code extraction: exact-match accuracy topped out below 30% — promising, but not usable."
+  caption="The starting point: untuned VLMs on raw field images topped out below 30% exact match — promising, but nowhere near usable."
 />
 
 Untuned performance was lacking, so the next question was diagnostic: **what
@@ -144,6 +145,20 @@ sub-1% end-to-end starting point. The lesson was blunt: in this pipeline,
 **preprocessing bought more accuracy than model choice**.
 
 </Split>
+
+This is the result that defines the project — so here is its graph. The same
+llama-4-maverick model that scored **29%** exact match on raw images scored
+**59%** on straightened tight crops: a doubling from preprocessing alone, with
+no change to the model. Put the best recognition model on top of those crops
+and exact-match accuracy reaches **79%**, with average per-digit accuracy at
+90%:
+
+<FullBleed
+  src={obbChart}
+  alt="Bar chart comparing seven model configurations on pipe-code extraction, sorted by accuracy: untuned gemma-3-12b at 17% exact match, llama-4-maverick at 29%, the same llama-4-maverick with straightened tight crops at 59%, and Ovis2 models on cropped input reaching 74% and 79% exact match with average digit accuracy up to 90%."
+  ratio="aspect-[21/9]"
+  caption="The decisive graph: identical model, 29% → 59% exact match once fed tight straightened crops (bars 4 vs 5); the best crop-fed model reaches 79%. Preprocessing, not model choice, drove the result."
+/>
 
 ## The generalisation wall
 
