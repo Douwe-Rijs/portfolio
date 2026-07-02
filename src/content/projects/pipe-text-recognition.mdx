@@ -1,0 +1,229 @@
+---
+title: 'Reading Pipe IDs Off Steel'
+summary: 'An R&D computer-vision pipeline that reads stencilled and chalked pipe numbers from photos taken inside pipeline pipes — from near-zero OCR accuracy to ~80% exact-ID matches.'
+role: 'R&D Engineer — Computer Vision'
+timeframe: '2025'
+preset: 'showcase'
+contributions:
+  - 'Benchmarked four open-source OCR stacks (Tesseract, EasyOCR, PaddleOCR, TrOCR) on real pipe imagery for both detection and recognition.'
+  - 'Pivoted the pipeline to vision-language models when classical OCR topped out, running inference on Databricks / AI-lab servers.'
+  - 'Diagnosed why untuned models failed and recovered accuracy with segmentation and oriented-bounding-box (OBB) preprocessing — from ~1% to almost 80% exact-ID matches.'
+  - 'Prototyped a stencil-agnostic ID locator using CRAFT text/linking scores and per-project unwrapped text maps.'
+  - 'Evaluated 360° in-pipe capture and an immediate character-crop method to make the pipeline camera- and project-agnostic.'
+tech:
+  - 'Python'
+  - 'OpenCV'
+  - 'PaddleOCR'
+  - 'YOLO'
+  - 'VLMs'
+  - 'CRAFT'
+  - 'Databricks'
+categories:
+  - 'Machine Learning'
+  - 'Perception'
+featured: true
+order: 2
+heroImage: '../../assets/projects/pipe-text-recognition/hero-pipe-interior.jpg'
+heroAlt: 'Looking down the red-coated interior of a large pipeline pipe, ringed by white stencilled supplier and specification text, with a small bright opening at the far end.'
+links: {}
+results:
+  - { label: 'Exact-ID accuracy', value: '~80%' }
+  - { label: 'Starting point', value: '~1%' }
+  - { label: 'OCR engines benchmarked', value: '4' }
+  - { label: 'Capture', value: '360° camera' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import glareContrast from '../../assets/projects/pipe-text-recognition/glare-contrast.jpg';
+import rustyPipe from '../../assets/projects/pipe-text-recognition/rusty-pipe-stencil.jpg';
+import ocrEasy from '../../assets/projects/pipe-text-recognition/ocr-easyocr.jpg';
+import ocrPaddle from '../../assets/projects/pipe-text-recognition/ocr-paddleocr.jpg';
+import vlmChart from '../../assets/projects/pipe-text-recognition/vlm-comparison-chart.jpg';
+import yoloObb from '../../assets/projects/pipe-text-recognition/yolo-obb-detection.jpg';
+import barossa from '../../assets/projects/pipe-text-recognition/barossa-pipe.jpg';
+import craftHeatmap from '../../assets/projects/pipe-text-recognition/craft-heatmap.jpg';
+import arcFitting from '../../assets/projects/pipe-text-recognition/arc-fitting.jpg';
+import pano from '../../assets/projects/pipe-text-recognition/pano-360.jpg';
+
+## Overview
+
+Every pipe joint that goes into an offshore pipeline carries an identity:
+supplier, specifications and — critically — a **pipe number**, stencilled or
+chalked onto the steel. Matching physical pipes to the database today means a
+person reading those markings by hand. This R&D project set out to automate it:
+photograph the inside of a pipe, and have a vision pipeline **find and read the
+pipe number** — robustly enough to verify the result against the company's
+asset system.
+
+## The problem
+
+The input images are hostile to OCR. Text curves around the inside of a
+cylinder, so every line is warped by **perspective and 3D curvature**. Photos
+arrive in any **orientation**, glossy coatings throw **glare**, and chalked
+numbers on dark steel offer almost no **contrast**. Some frames are simply
+unusable.
+
+<Split src={glareContrast} alt="A dim photo taken inside a dark pipe: stencilled text is barely legible through heavy glare and low contrast, with a torch reflection blowing out part of the frame." caption="A typical hard input: low contrast, glare and curved text on dark steel." reverse>
+
+An early idea was to geometrically **unwrap the cylinder** — map the curved
+text back to a flat plane and hand it to a standard OCR engine. It works on
+paper, but it depends on a clean mask of the text region, and masks are exactly
+what glare, orientation and contrast make difficult. The straightening approach
+was parked, and the pipeline was reframed around a different idea: **isolate
+the information first**, then read only that.
+
+</Split>
+
+<FullBleed
+  src={rustyPipe}
+  alt="Looking into a weathered, rust-brown pipe with white specification text stencilled in an arc on the dark coated interior."
+  ratio="aspect-[21/9]"
+  caption="No two pipes photograph alike — coatings, wear, lighting and stencil position all vary."
+/>
+
+## Benchmarking the OCR landscape
+
+Four open-source engines were put through detection and recognition tests on
+real pipe imagery: **Tesseract**, **EasyOCR**, **PaddleOCR** and **TrOCR**.
+Tesseract's classical stack needed binarisation and still underperformed;
+EasyOCR detected reasonably but recognised poorly; transformer-based TrOCR was
+"not so SOTA after all" for this domain. **PaddleOCR** was the clear winner on
+both detection and recognition.
+
+Drag the slider — same photo, EasyOCR's garbled output versus PaddleOCR
+correctly recovering `API SPEC 5L`, the pipe number and `MADE IN GREECE`:
+
+<Compare
+  one={ocrEasy}
+  two={ocrPaddle}
+  altOne="Pipe stencil photo overlaid with EasyOCR output: most lines are garbled non-words such as 'CHFVIRON LMGL' and 'riestizd'."
+  altTwo="The same pipe stencil photo overlaid with PaddleOCR output: lines read correctly as API SPEC SL, PIPENO, TESTED 51.5 MPA and MADE IN GREECE."
+  labelOne="EasyOCR"
+  labelTwo="PaddleOCR"
+/>
+
+Winning the benchmark was not the same as solving the problem: end-to-end on
+raw field images, even PaddleOCR **failed to produce the correct pipe number
+almost every time**. The interesting work started here.
+
+## From OCR to vision-language models
+
+Training one classical OCR model to survive varying lighting, handwriting,
+fonts and orientations was judged infeasible. **Vision-language models** are a
+better fit for exactly that messiness, and while training one from scratch was
+out of scope, **tuning and prompting** were not — with inference running on
+Databricks cloud and the internal AI-lab server.
+
+<Figure
+  src={vlmChart}
+  alt="Bar chart comparing untuned VLMs on pipe-code extraction: gemma-3-12b reaches about 17% exact match, two llama-4-maverick variants about 29%, with average digit accuracy between 41% and 58%."
+  figNumber="1"
+  caption="Untuned VLMs on pipe-code extraction: exact-match accuracy topped out below 30% — promising, but not usable."
+/>
+
+Untuned performance was lacking, so the next question was diagnostic: **what
+separates a correct read from a wrong one?** Inspecting failures showed most of
+the loss came from context — models grabbing neighbouring digits, chalk marks
+and specification text. The accuracy was hiding behind **tighter crops**.
+
+## Tighter crops: segmentation → oriented boxes
+
+Segmentation masks confirmed the diagnosis — cropping tighter sharply reduced
+faulty reads, and chalked digits could be reliably distinguished from
+stencilled text. But per-pixel labelling is expensive, and masks risk cutting
+away useful context. The pragmatic middle ground: **oriented bounding boxes**
+(OBB), which focus the model on the ID while being far cheaper to label.
+
+<Split src={yoloObb} alt="Black-and-white view inside a pipe with a green oriented bounding box drawn by a YOLO model around one stencilled text region, scored 0.30." caption="A YOLO OBB detector focusing the pipeline on the text that matters.">
+
+With OBB preprocessing feeding tighter crops into a stronger recognition
+model, exact-ID accuracy jumped to **almost 80%** — a step change from the
+sub-1% end-to-end starting point. The lesson was blunt: in this pipeline,
+**preprocessing bought more accuracy than model choice**.
+
+</Split>
+
+## The generalisation wall
+
+Then came pipes from other projects. Colours, stencil layouts, text fonts,
+chalk styles and pipe diameters all change between projects — and a detector
+trained on one layout **quietly predicts the same relative location** on the
+next, because it cannot actually read.
+
+<FullBleed
+  src={barossa}
+  alt="Looking into a red-coated Barossa project pipe: white stencilled text arcs around the interior wall listing contractor, project, pipe size, heat number and coater."
+  ratio="aspect-[16/9]"
+  caption="A Barossa-project pipe: same task, different colours, stencil layout and diameter."
+/>
+
+That framed the real trade-off. **YOLO** is fast but layout-biased by
+construction; a **VLM** can genuinely read a stencil but is slow, expensive and
+easily confused by many lines. The middle path prototyped here: locate the ID
+**without** understanding the stencil, using **CRAFT text and linking scores** —
+which respond to _textness_ rather than colour or font, and worked across all
+stencils and colours tested.
+
+<Figure
+  src={craftHeatmap}
+  alt="CRAFT text-score heatmap of a pipe interior: curved strokes of stencilled characters glow red and yellow against a deep blue background, tracing the arc of the text."
+  figNumber="2"
+  caption="CRAFT text scores light up characters regardless of stencil, paint or pipe colour — a colour- and layout-agnostic signal for locating text."
+/>
+
+<Split src={arcFitting} alt="Diagnostic plot of a binarised pipe-text mask with blue radial lines and a fitted arc tracing the curvature of the stencilled text rows." caption="Fitting arcs through detected text to model the cylinder's curvature." reverse>
+
+The text scores double as geometry: fitting **arcs** through them recovers the
+text's curvature and direction, which is enough to build **one unwrapped text
+map per project**. Locate the pipe number once on that map, and its relative
+position pins the ID in every other photo from the same project — one manual
+step per project instead of one per pipe.
+
+</Split>
+
+## Capturing the whole pipe at once
+
+A regular camera can miss the ID entirely if it happens to face away from the
+lens. A **360° camera** cannot — all text is always somewhere in the frame,
+which also makes continuous recording of whole pipe stacks plausible. Drag
+through a real capture from inside a pipe:
+
+<Pano360
+  src={pano}
+  alt="Equirectangular 360-degree capture from inside a rusted pipe, with stencilled project and specification text arcing across the lower half and daylight visible at both open ends"
+  caption="A real 360° in-pipe capture — the stencilled ID is always in frame, wherever it sits on the circumference. Drag to look around."
+  height="65vh"
+/>
+
+On these panoramas an **immediate crop method** proved attractive: no YOLO, no
+unwarping — detect text, crop **characters individually**, and simply index the
+characters that form the ID (say, line 4, characters 10–14). Individual crops
+also sidestep distortion and give the recogniser its best-case input.
+
+## Results
+
+- Exact-ID accuracy went from **~1% to almost 80%** — driven primarily by OBB
+  preprocessing and a stronger recognition model, not by any single "better"
+  OCR engine.
+- **PaddleOCR** won the four-way benchmark on both detection and recognition;
+  recognised IDs are cross-checked against the ship's asset database via an
+  internal API.
+- **CRAFT text/linking scores** located text reliably across every stencil,
+  colour and pipe tested — the most generalisable component of the system.
+- Honest caveats: accuracy is not 100% (overlapping text, similar characters),
+  a wrong read can go unnoticed without database confirmation, and the mapping
+  approach still needs **one manual localisation per project**.
+
+## Lessons learned
+
+- **Diagnose before you tune.** The jump from 30% to 80% came from asking what
+  separated right from wrong answers — the fix was preprocessing, not a bigger
+  model.
+- **Benchmarks are not pipelines.** The best engine on curated tests still
+  failed end-to-end; the gap _was_ the project.
+- **Bias can be structural.** A detector that cannot read will always guess by
+  layout; no amount of de-biasing changes what the architecture can express.
+- **Change the sensor, change the problem.** 360° capture dissolved the
+  "is the ID even in frame?" failure mode more cheaply than any model fix.

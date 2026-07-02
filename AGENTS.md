@@ -109,9 +109,9 @@ Full detail in `docs/CONTENT_PIPELINE.md`. To add a case study:
    - **Stay image-centric:** weave imagery through the prose with the editorial
      kit in `src/components/case/` (`Figure`, `FullBleed`, `Split`, `Gallery`,
      `Metrics`, `PullQuote`, `SectionLabel`) plus interactive islands
-     (`ScrollParallax`, `Compare`, animated `Metrics`) — available in every MDX
-     body without importing the component. Islands hydrate lazily and respect
-     `prefers-reduced-motion`. Never leave a case study as plain prose.
+     (`ScrollParallax`, `Compare`, `Pano360`, animated `Metrics`) — available in
+     every MDX body without importing the component. Islands hydrate lazily and
+     respect `prefers-reduced-motion`. Never leave a case study as plain prose.
    - Set `status: published` and `featured: true` for homepage projects.
 4. `npm run build` validates everything.
 

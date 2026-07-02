@@ -181,11 +181,13 @@ import pipeline from '../../assets/projects/<slug>/pipeline.jpg';
 
 <ScrollParallax src={hero} alt="…" /> {/* scroll-linked parallax image */}
 <Compare one={raw} two={overlay} altOne="…" altTwo="…" labelOne="Input" labelTwo="Detected" />
+<Pano360 src={pano} alt="…" caption="…" /> {/* drag-to-pan 360° equirectangular viewer */}
 ```
 
-The interactive pieces (`ScrollParallax`, `Compare`, and the count-up animation
-in `Metrics variant="bold"`) hydrate **only on the pages that use them** and all
-honour `prefers-reduced-motion`, so quiet presets stay ~0 KB JS.
+The interactive pieces (`ScrollParallax`, `Compare`, `Pano360`, and the
+count-up animation in `Metrics variant="bold"`) hydrate **only on the pages
+that use them** and all honour `prefers-reduced-motion`, so quiet presets stay
+~0 KB JS.
 
 Authoring rules:
 
