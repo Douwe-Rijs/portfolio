@@ -1,0 +1,151 @@
+---
+title: 'Measuring Evaporation at 500 Bar'
+summary: 'Design of a titanium pressure vessel and measurement method to determine the evaporation/condensation rate of water at 200–500 bar — where the ideal gas law and standard theory stop working.'
+role: 'Thermodynamics & Mechanical Design (group)'
+timeframe: 'BSc Mechanical Engineering, TU Delft · 2024'
+teamSize: 6
+preset: 'motion'
+theme:
+  accent: '#0e7490'
+  accentDark: '#22d3ee'
+skills:
+  - 'Pressure vessel design (EN 13445)'
+  - 'Thermodynamic modelling'
+  - 'Measurement system design'
+  - 'Regulatory analysis (PED)'
+takeaways:
+  - 'Above 500 bar the ideal gas law quietly fails (Z > 1.5) — Van der Waals and empirical averaging had to replace the textbook Hertz–Knudsen route.'
+  - 'Instrument choice is design: a magnetic level gauge measures through a titanium wall, turning one before/after data point into a continuous signal.'
+  - 'Safety is designed, not added: PED Category IV, a 650 bar design margin, weld efficiency 0.8 and a directional failure point were requirements like any other.'
+tech:
+  - 'Thermodynamics'
+  - 'Pressure Vessel Design'
+  - 'EN 13445'
+  - 'Instrumentation'
+categories:
+  - 'Design'
+featured: false
+order: 9
+heroImage: '../../assets/projects/high-pressure-chamber/sketch-seal-bolts.jpg'
+heroAlt: 'Hand-drawn section sketch of the pressure vessel cap joint: an M24 bolt through the flange, the O-ring in its groove, and the 15.4 millimetre titanium wall annotated.'
+links: {}
+results:
+  - { label: 'Operating pressure', value: '200–500 bar' }
+  - { label: 'Design pressure (margin)', value: '650 bar' }
+  - { label: 'Titanium wall, calculated', value: '15.4 mm' }
+  - { label: 'Cap retention', value: '16× M24' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import sketchTankDims from '../../assets/projects/high-pressure-chamber/sketch-tank-dims.jpg';
+import sketchSealDetail from '../../assets/projects/high-pressure-chamber/sketch-seal-detail.jpg';
+import pedChart from '../../assets/projects/high-pressure-chamber/ped-category-chart.jpg';
+
+## Overview
+
+How fast does water evaporate at **500 bar**? The question matters for
+advanced (notably sustainable) cooling systems — and it cannot be answered
+from theory, because the standard tools assume ideal gases. For the Process
+Engineering & Thermodynamics course (WB2543), our six-person team designed an
+apparatus to measure the evaporation/condensation rate of water at 200 and
+500 bar at room temperature: a **titanium pressure vessel**, its sealing and
+safety systems, the instrumentation, and the measurement method itself.
+
+## Where the textbook stops
+
+The natural starting point, the **Hertz–Knudsen equation**, is derived from
+ideal-gas assumptions — and above 500 bar the compressibility factor of water
+vapour exceeds **1.5**, so those assumptions are simply false. The design
+therefore uses the **Van der Waals equation** to relate pressure, volume and
+amount of gas, and replaces a single theoretical prediction with an
+**empirical strategy**: measure the rate over several small pressure
+intervals bracketing the target (450–550, 490–510, …), filter outliers beyond
+one standard deviation, and average toward the local rate.
+
+That strategy dictated the measurement method. Of two candidates — continuous
+**water-level tracking** versus a before/after **humidity measurement** — the
+level method wins outright: it produces a continuous signal (effectively
+unlimited data points) where the humidity method yields exactly one, far too
+little for statistical filtering. Volume change follows directly from the
+cylinder geometry: V = πr²·ΔH.
+
+## Designing the vessel
+
+A cylinder (~35 L, 50 cm inner height) beats a sphere: nearly as
+good under pressure, far easier to manufacture — and its **constant
+evaporation surface** is exactly what the level-based method needs.
+**Titanium** was selected over aluminium and stainless steel for its
+stiffness (deformation corrupts the height-to-volume conversion), corrosion
+resistance, and — decisively — because it is **non-magnetic**, letting a
+magnetic level gauge read the float _through the wall_ with no penetration.
+
+Wall thickness follows EN 13445-3 with a design pressure of **650 bar**
+(margin above the 500 bar operating point), the 300 mm bore and a conservative
+weld-seam efficiency of 0.8:
+
+e = P·Dᵢ / (2·f·z − P) = **15.4 mm** of titanium.
+
+<Figure
+  src={sketchTankDims}
+  alt="Hand-drawn section sketch of the cylindrical tank interior with the 50 centimetre inner height annotated."
+  figNumber="1"
+  caption="The vessel as first drawn: a plain cylinder whose constant cross-section makes the level measurement linear."
+  class="mx-auto max-w-xs"
+/>
+
+<Split src={sketchSealDetail} alt="Close-up hand sketch of the seal groove region showing the O-ring cross-section between threaded flange faces with dimension annotations." caption="Seal detail: backup rings on both sides of the O-ring stop it extruding into the gap at 650 bar." reverse>
+
+At 650 bar the pressure on the cap amounts to roughly **2,042 kN** — the
+weight of a small building pulling the lid off. Divided by the 135 kN
+capacity of an M24 bolt, the joint needs **16 bolts**, seated on a machined
+rim that also carries the O-ring groove. The O-rings get **backup rings** on
+both sides: at these pressures an unsupported elastomer simply extrudes into
+the clearance gap.
+
+</Split>
+
+## Safety as a design input
+
+The vessel falls squarely into **Category IV** of the EU Pressure Equipment
+Directive (2014/68/EU) — the heaviest conformity class. Beyond the
+documentation burden, safety shaped the hardware: the tank is deliberately
+over-engineered, and a **defined weak point** is built in so that if it ever
+fails, it ruptures directionally, away from anyone near it — a controlled
+release instead of a fragmenting vessel.
+
+<Figure
+  src={pedChart}
+  alt="Pressure Equipment Directive classification chart plotting pressure against volume for Group 2 gases, with the design point marked deep inside Category IV."
+  figNumber="2"
+  caption="The design point (650 bar, ~35 L) sits deep in PED Category IV — the strictest conformity assessment class."
+/>
+
+Instrumentation completes the design: a **Bourdon-tube gauge** for pressure
+(capsule gauges stop far below 500 bar), a **bimetal thermometer** to confirm
+the 300 K condition, the **magnetic level gauge** for the continuous height
+signal, and a **3-way solenoid valve** (10–100 ms response) so the chamber can
+be depressurised without disconnecting the compressor.
+
+## Honest limits
+
+The design is a paper machine: it was never built, and the report says so.
+Even titanium deforms slightly at 650 bar, biasing the height-to-volume
+conversion; small pressure intervals make height changes small relative to
+measurement error (hence the averaging strategy); and cyclic-loading fatigue
+was left out of scope entirely.
+
+## Lessons learned
+
+- **Check your equations' assumptions before your arithmetic.** The entire
+  measurement strategy exists because Hertz–Knudsen silently assumes an ideal
+  gas.
+- **Choose instruments that don't fight the vessel.** The magnetic gauge
+  through a non-magnetic wall removed every penetration a level sensor would
+  otherwise need.
+- **Regulation is load-bearing.** PED Category IV set the margins, the weld
+  efficiency and the documentation — as rigidly as the 650 bar itself.
+- **A good measurement method is statistics first.** Continuous data beat a
+  single before/after point long before accuracy of any individual sensor
+  mattered.

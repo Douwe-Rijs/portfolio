@@ -1,0 +1,129 @@
+---
+title: 'A Sticker That Remembers the Strike'
+summary: 'A materials-science study of mechanochromic polymers for golf swing analysis: a club-face layer that changes colour under the ~21 MPa of a drive, then resets for the next swing.'
+role: 'Materials Research (group)'
+timeframe: 'BSc Materials Science, TU Delft · 2024'
+teamSize: 6
+preset: 'paper'
+theme:
+  accent: '#be185d'
+  accentDark: '#f472b6'
+skills:
+  - 'Materials selection & literature research'
+  - 'Requirements engineering'
+  - 'Impact mechanics estimation'
+  - 'FEA (SolidWorks)'
+takeaways:
+  - 'Translating a fuzzy wish ("see how I hit the ball") into hard numbers — 21 MPa threshold, 10–15 s reset — is what makes material candidates comparable at all.'
+  - 'Molecular-scale switches (mechanophores) that trigger at nanonewtons are useless at driver-impact loads; structural colour scales, chemistry often does not.'
+  - 'A literature study can eliminate candidates decisively, but it cannot pick a final material — that needs the lab.'
+tech:
+  - 'Mechanochromic Polymers'
+  - 'Photonic Materials'
+  - 'FEA'
+  - 'Materials Science'
+categories:
+  - 'Design'
+featured: false
+order: 8
+heroImage: '../../assets/projects/golf-impact-polymers/layered-material.jpg'
+heroAlt: 'Exploded diagram of the proposed sensing sticker: a mechanochromic hydrogel layer sandwiched between two protective transparent polymer layers.'
+links: {}
+results:
+  - { label: 'Impact stress to detect', value: '21 MPa' }
+  - { label: 'Target reset time', value: '10–15 s' }
+  - { label: 'Material classes screened', value: '3' }
+  - { label: 'Verdict', value: 'Photonic' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import feaStrain from '../../assets/projects/golf-impact-polymers/fea-strain.jpg';
+import feaDisplacement from '../../assets/projects/golf-impact-polymers/fea-displacement.jpg';
+
+## Overview
+
+Swing analysis today means either an expensive simulator or a coach's eye.
+This second-year materials project asked whether a **sticker on the club
+face** could do part of the job: a mechanochromic material that changes colour
+where — and how hard — the ball strikes, visible at a glance, then resets for
+the next swing. The work is a structured materials study: derive the loads,
+set requirements, screen the candidate chemistry and physics, and select the
+most promising route.
+
+## From swing to specification
+
+A driver strikes the ball with up to **9,000 N**. FEA of the impact shows the
+42.70 mm ball flattening to a 23.40 mm contact patch — an area of
+4.3×10⁻⁴ m², giving a design stress of **21 MPa**. Watching real practice
+rhythm set the second requirement: the colour change must be readable and
+then reset in roughly **10–15 seconds**, so every swing gets a fresh canvas.
+The material must also survive 21 MPa without damage, add negligible mass,
+and behave as much like the club face as possible.
+
+## Screening the candidates
+
+Three material classes went through the filter:
+
+**Mechanophore-linked polymers** — molecular switches (spiropyran, rhodamine,
+carbon-centred mechanoradicals) that change colour when a bond is stretched.
+Elegant chemistry, but the activation thresholds sit at **single
+nanonewtons** per molecule: rhodamine and CABBF discolour far too easily for
+a driving range, and rhodamine's reset (3 minutes under UV, up to 24 hours at
+room temperature) misses the 10–15 s target by orders of magnitude.
+
+**Chemiluminescent polymers** — emit light as bonds sever. Disqualified
+immediately: the effect is **not reversible**, and a one-shot sticker is not a
+training tool.
+
+**Mechanochromic photonic materials** — colour from _structure_, not
+chemistry: nanoscale layers create a photonic bandgap, and pressure changes
+the layer spacing `d` in Bragg's law (2d·sinθ = nλ), shifting which
+wavelength reflects. Fast response, chemically stable, resistant to
+photobleaching — and the colour change scales with deformation, exactly the
+quantity a swing analysis needs.
+
+## The proposed design
+
+The selected concept is the layered sticker in the hero image: a
+**mechanochromic photonic layer sandwiched between protective polymer
+skins**, so the fragile optical structure never takes the hit directly. For
+the carrier, FEA on an acrylate layer under the 21 MPa impact confirmed it
+survives with strains in the 10⁻³ range — where a soft alternative like PDMS
+(yield ≈ 700 kPa) would fail thirty-fold below the requirement.
+
+<Figure
+  src={feaStrain}
+  alt="FEA strain plot of the acrylate carrier layer under simulated ball impact: a circular contact patch with peak strain around 3.8 times ten to the minus three, fading radially."
+  figNumber="1"
+  caption="Acrylate carrier under the 21 MPa impact patch: peak strain ~3.8×10⁻³ — the protective skin holds."
+/>
+
+<Figure
+  src={feaDisplacement}
+  alt="FEA displacement plot of the acrylate layer under impact loading, showing micrometre-scale deflection concentrated in an elliptical contact region."
+  figNumber="2"
+  caption="Displacement stays in the micrometre range — deformation enough to shift the photonic colour, not enough to damage the stack."
+/>
+
+## Honest limits
+
+This is a **literature-based selection**, and the report says so plainly: no
+candidate could be crowned without lab work. Regeneration behaviour under
+varying sunlight is under-documented for the mechanophores, and the photonic
+route's core challenge — manufacturing layers at exactly the thickness
+Bragg's law demands — is identified but not solved. The conclusion is a
+direction with a test plan, not a product.
+
+## Lessons learned
+
+- **Requirements turn chemistry into engineering.** Until 9,000 N became
+  21 MPa and "quick" became 10–15 s, the three material classes could not
+  even be compared.
+- **Match the physics to the load scale.** Nanonewton molecular switches and
+  a 9 kN impact live in different worlds; structural colour bridges the gap.
+- **Elimination is a result.** Two of three classes fell to hard,
+  quantitative mismatches — that is the study working, not failing.
+- **Know where the desk stops.** The final ranking is honest about needing
+  experiments; overselling a literature result helps no one.

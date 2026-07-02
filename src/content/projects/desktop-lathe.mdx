@@ -1,0 +1,143 @@
+---
+title: 'A Desktop Lathe, Built From Scratch'
+summary: 'A working miniature metal lathe — spindle, stepper-driven cross-slide and enclosure — designed in SolidWorks, verified with hand calculations and FEM, then machined, assembled and run.'
+role: 'Mechanical Design & Build'
+timeframe: 'BSc Mechanical Engineering, TU Delft'
+preset: 'editorial'
+theme:
+  accent: '#475569'
+  accentDark: '#94a3b8'
+heroLayout: 'split'
+skills:
+  - 'Machine design (SolidWorks)'
+  - 'Hand calculations & FEM verification'
+  - 'Machining & assembly'
+  - 'Motor sizing & error budgeting'
+takeaways:
+  - 'A calculation as simple as F = k·A decides real hardware: 10 N of cutting force sized the motor, the collet holder and the decision to skip a bearing.'
+  - 'FEM is cheapest before you build — one simulation on the collet holder deleted a whole bearing assembly from the design.'
+  - 'A machine that runs on a desk teaches more than a perfect CAD model: stiffness, burrs and noise only show up in the metal.'
+tech:
+  - 'SolidWorks'
+  - 'FEM'
+  - 'Stepper Motors'
+  - 'Machining'
+  - 'Mechanical Design'
+categories:
+  - 'Design'
+featured: false
+order: 7
+heroImage: '../../assets/projects/desktop-lathe/lathe-built.jpg'
+heroAlt: 'The finished desktop lathe on a desk: an aluminium bed with a stepper-driven cross-slide and tool holder in front of a bolted sheet-metal headstock enclosure.'
+links: {}
+results:
+  - { label: 'Cutting force, calculated', value: '10 N' }
+  - { label: 'Motor power, needed → available', value: '5 → 22 W' }
+  - { label: 'Step error, worst case', value: '0.09°' }
+  - { label: 'From CAD to running machine', value: 'Built ✓' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import cadFull from '../../assets/projects/desktop-lathe/cad-full.jpg';
+import compareCad from '../../assets/projects/desktop-lathe/compare-cad.jpg';
+import compareReal from '../../assets/projects/desktop-lathe/compare-real.jpg';
+import headstock from '../../assets/projects/desktop-lathe/headstock-motors.jpg';
+import cadCrossSlide from '../../assets/projects/desktop-lathe/cad-cross-slide.jpg';
+import femDisplacement from '../../assets/projects/desktop-lathe/fem-displacement.jpg';
+
+## Overview
+
+A miniature but genuinely working **metal lathe**: a DC spindle motor in a
+bolted sheet-metal headstock, an ER11 collet holding the workpiece, and a
+stepper-driven cross-slide feeding the cutting tool. The machine was designed
+in SolidWorks, sized with hand calculations, sanity-checked with FEM — and then
+actually machined, assembled and run.
+
+<Compare
+  one={compareCad}
+  two={compareReal}
+  altOne="SolidWorks render of the desktop lathe: grey sheet-metal headstock box, cross-slide with tool block and stepper motor on an aluminium bed."
+  altTwo="Photograph of the finished desktop lathe from the same angle: the machined aluminium cross-slide and bolted steel headstock on a desk."
+  labelOne="SolidWorks"
+  labelTwo="Built"
+/>
+
+## Sizing the machine by hand
+
+Every component traces back to one number: the **cutting force on the tool**.
+With a specific cutting force of 800 MPa, a feed of 0.05 mm/rev and a cut depth
+of 0.25 mm, the force comes out at just **10 N** — small, but it propagates
+through the whole design:
+
+- **Motor power:** 10 N at a cutting speed of 0.5 m/s demands **5 W**. The DC
+  motor delivers up to **22.32 W** at 20 V (from its stall torque and no-load
+  speed) — comfortable margin, verified rather than assumed.
+- **Positioning error:** the steppers carry a worst-case offset of 5% of one
+  step — **0.09° per step**, negligible against the mechanics.
+- **Tool-holder stiffness:** measured in both X and Y; deflection stayed at or
+  below roughly 0.1 mm.
+
+<Split src={femDisplacement} alt="SolidWorks FEM displacement plot of the ER11 chuck collet under cutting load, showing a rainbow gradient with maximum deflection in the micrometre range at the tip." caption="The FEM verdict on the collet holder: micrometre-scale deflection under cutting load — no extra bearing needed." reverse>
+
+The most consequential check was on the **collet holder**: would the motor
+shaft bend under cutting load without a support bearing? A static FEM study
+(cutting force applied as the hand-calculated force + moment) showed
+deflections in the micrometre range and no concerning stress concentrations —
+so the extra bearing was **deliberately left out**. One simulation deleted an
+entire subassembly.
+
+</Split>
+
+## From CAD to metal
+
+<FullBleed
+  src={cadFull}
+  alt="Full SolidWorks assembly render of the desktop lathe: bed, cross-slide with tool block, stepper motor, and closed headstock enclosure with fastener detail."
+  ratio="aspect-[21/9]"
+  caption="The full SolidWorks assembly — every plate, standoff and fastener modelled before any metal was cut."
+/>
+
+<Split src={headstock} alt="Inside the headstock enclosure: the DC spindle motor mounted above a NEMA stepper motor within a bolted frame of steel angle profiles.">
+
+The headstock packs the DC spindle motor and stepper into a bolted frame of
+steel angle profiles — every joint mechanical, no welds, so the enclosure
+could be corrected and re-machined as the build progressed. The cross-slide
+runs on ground rods with a leadscrew per axis.
+
+</Split>
+
+<Figure
+  src={cadCrossSlide}
+  alt="SolidWorks detail view of the cross-slide: tool block with clamping bolts, brass leadscrew nut, guide rods and the stepper coupling."
+  figNumber="1"
+  caption="Cross-slide detail: tool block, leadscrew and stepper coupling."
+/>
+
+## It runs
+
+The proof is watching it cut. Feed the tool in, and the machine behaves the
+way the numbers said it would — with one honest caveat from the error budget:
+it is **not quiet**, and gets louder as the tool approaches the collet, simply
+because more material (and its burrs) is being pushed aside per revolution.
+
+<Video
+  src="/media/desktop-lathe/lathe-run.mp4"
+  poster="/media/desktop-lathe/lathe-run-poster.jpg"
+  label="The finished desktop lathe running on a desk, spindle turning with the cross-slide assembled in front"
+  caption="The lathe running. Cabling still temporary; machine very real."
+  class="mx-auto max-w-sm"
+/>
+
+## Lessons learned
+
+- **Trace every part to a load case.** The 10 N cutting force sized the motor,
+  justified omitting a bearing, and set the stiffness target — one number,
+  five decisions.
+- **Simulate to delete, not to decorate.** The FEM run existed to answer a
+  yes/no question (bearing or not), and it removed real parts and cost.
+- **Margins you calculate are margins you trust.** Needing 5 W and having
+  22 W was a verified fact, not a hope.
+- **The desk is the final exam.** Stiffness, noise and burrs never show up in
+  CAD — building the machine is what makes the design honest.

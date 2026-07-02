@@ -1,0 +1,61 @@
+---
+/**
+ * Self-hosted video for case studies (e.g. a machine running). Ships 0 JS:
+ * lazy-loaded, muted, looping, plays inline with native controls, and never
+ * autoplays under `prefers-reduced-motion` (a tiny inline matchMedia check
+ * gates the autoplay attribute at paint time; controls always allow manual
+ * play). Files live in `public/media/<slug>/`.
+ */
+interface Props {
+  /** Path under public/, e.g. "/media/desktop-lathe/lathe-run.mp4". */
+  src: string;
+  poster?: string;
+  caption?: string;
+  /** Accessible description of what the video shows. */
+  label: string;
+  /** Constrain width for portrait clips, e.g. "max-w-sm". */
+  class?: string;
+  autoplay?: boolean;
+}
+
+const { src, poster, caption, label, class: className = '', autoplay = true } = Astro.props;
+---
+
+<figure class={`not-prose my-[var(--rhythm)] ${className}`}>
+  <video
+    src={src}
+    poster={poster}
+    aria-label={label}
+    controls
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    data-autoplay={autoplay ? 'true' : undefined}
+    class="w-full rounded-token border border-line bg-black"></video>
+  {caption && <figcaption class="mt-3 font-mono text-xs text-muted">{caption}</figcaption>}
+</figure>
+
+<script is:inline>
+  // Autoplay muted loops only when motion is welcome and the video is visible.
+  (() => {
+    const init = () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      document.querySelectorAll('video[data-autoplay]').forEach((v) => {
+        if (v.dataset.bound) return;
+        v.dataset.bound = '1';
+        new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) e.target.play().catch(() => {});
+              else e.target.pause();
+            });
+          },
+          { threshold: 0.4 },
+        ).observe(v);
+      });
+    };
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script>
