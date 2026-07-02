@@ -1,0 +1,153 @@
+---
+title: 'Torque Vectoring Through the Double Lane Change'
+summary: 'A PID vs LQR comparison of torque-vectoring yaw-moment control on a 9-DOF nonlinear vehicle model — halving lateral tracking error, and turning an unfinishable manoeuvre into a finished one.'
+role: 'Modelling & Control Design (group)'
+timeframe: 'TU Delft · RO47017'
+teamSize: 5
+preset: 'paper'
+theme:
+  accent: '#1d4ed8'
+  accentDark: '#60a5fa'
+contributions:
+  - 'Co-developed the Simulink torque-vectoring controllers and the double-lane-change evaluation as a five-person group effort.'
+tech:
+  - 'MATLAB'
+  - 'Simulink'
+  - 'LQR'
+  - 'PID'
+  - 'Vehicle Dynamics'
+  - 'Magic Formula Tires'
+categories:
+  - 'Control'
+featured: false
+order: 5
+heroImage: '../../assets/projects/torque-vectoring-control/birdseye-path.jpg'
+heroAlt: 'Bird’s-eye plot of a double lane change: the reference path in dashed black, with the PD-only controller in blue oscillating after the second lane change while the PID-TV and LQR-TV controllers in red and green settle cleanly onto the reference.'
+links: {}
+results:
+  - { label: 'RMS lateral error', value: '−50%' }
+  - { label: 'RMS yaw-rate error', value: '−61%' }
+  - { label: 'Vehicle model', value: '9 DOF' }
+  - { label: 'LQR speed grid', value: '5–130 km/h' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import lateralError from '../../assets/projects/torque-vectoring-control/lateral-error.jpg';
+import yawRateError from '../../assets/projects/torque-vectoring-control/yaw-rate-error.jpg';
+import torqueTraces from '../../assets/projects/torque-vectoring-control/torque-traces.jpg';
+import radarComparison from '../../assets/projects/torque-vectoring-control/radar-comparison.jpg';
+
+## Overview
+
+A double lane change — swerving around an obstacle and back — is one of the
+harshest everyday manoeuvres a passenger car performs: it demands accurate
+lateral path tracking and yaw stability _at the same time_, and steering alone
+struggles to deliver both. This RO47017 group project designed and compared two
+**torque-vectoring (TV)** controllers — a hand-tuned **PID** and a
+speed-scheduled **LQR** — layered on a steering-PD baseline, on a 9-DOF
+nonlinear Simulink vehicle model with Magic-Formula tires, parameterised as a
+Tesla Model 3 Performance and a Toyota Camry.
+
+## The problem
+
+A steering PD loop fast enough to correct lateral position tends to overshoot
+or lag the yaw response, especially as front-tire slip grows through the
+chicane. Torque vectoring adds a second, independent actuator: applying
+**differential torque** between left and right wheels generates a direct yaw
+moment, decoupling yaw control from steering. The question was not whether TV
+is possible, but **which controller structure buys what** — raw tracking,
+comfort, robustness — and at what actuator cost.
+
+## Method
+
+Both TV controllers act on the yaw-rate error against a filtered
+bicycle-model reference (τ = 0.09 s), with ΔT saturated at ±1200 N·m and split
+50/50 between axles:
+
+- **PID-TV** — gains tuned manually on the Model 3
+  (K<sub>p</sub> = 1300, K<sub>i</sub> = 60, K<sub>d</sub> = 30).
+- **LQR-TV** — a linear bicycle model with state [β, r − r<sub>ref</sub>],
+  Q = diag(15000, 15000), R = 10⁻⁴, gain-scheduled offline by solving the
+  Riccati equation on a 5–130 km/h grid in 5 km/h steps.
+
+All metrics are evaluated over the manoeuvre's active window at constant
+entry speed.
+
+<Figure
+  src={lateralError}
+  alt="Lateral tracking error in centimetres along the manoeuvre: the PD-only trace in blue peaks near minus 59 centimetres after the second transition, while PID-TV in red and LQR-TV in green stay within roughly plus-minus 35 centimetres and settle quickly."
+  figNumber="1"
+  caption="Lateral tracking error. The PD-only baseline (blue) diverges to −0.59 m after the second lane change; both TV controllers stay bounded and settle."
+  widths={[768, 1280]}
+/>
+
+## Results
+
+Torque vectoring transformed the manoeuvre on the Model 3:
+
+- **RMS lateral error:** 0.088 m (PD only) → **0.044 m** with PID-TV (−50%)
+  and 0.056 m with LQR-TV.
+- **RMS yaw-rate error:** 0.200 rad/s → **0.078** (PID-TV) / **0.073 rad/s**
+  (LQR-TV) — a 61–63% reduction.
+- **Peak lateral error:** 0.589 m → 0.266 m (PID-TV).
+
+<Figure
+  src={yawRateError}
+  alt="Yaw-rate tracking error over time: the PD-only trace in blue repeatedly peaks near plus-minus 1 to 1.4 radians per second, while the PID-TV and LQR-TV traces remain within roughly plus-minus 0.5 and 0.8 radians per second respectively."
+  figNumber="2"
+  caption="Yaw-rate tracking error. TV cuts peak error from 1.46 rad/s to 0.78 (PID) and 0.51 (LQR)."
+  widths={[768, 1280]}
+/>
+
+The two controllers trade different currencies. **PID-TV** achieves the best
+raw lateral tracking and never saturates (peak |ΔT| = 812 N·m). **LQR-TV**
+delivers the cleaner yaw response and a lower peak lateral acceleration
+(7.62 vs 8.47 m/s²) — a more comfortable ride — but leans on the actuator,
+sitting at the ±1200 N·m saturation limit for ~7% of the run.
+
+<Figure
+  src={torqueTraces}
+  alt="Two stacked torque-versus-time plots: the PID-TV differential torque peaks around 800 newton-metres, while the LQR-TV trace repeatedly flat-tops at the plus-minus 1200 newton-metre saturation limit, with the rear-left and rear-right wheel torques mirrored around zero."
+  figNumber="3"
+  caption="Differential torque commands. PID-TV (top) stays inside the actuator envelope; LQR-TV (bottom) rides the ±1200 N·m saturation limit."
+  widths={[768, 1280]}
+/>
+
+The cross-vehicle test is the sharpest result. On the more understeering Camry
+(K<sub>us</sub> ≈ 66% higher than the Model 3), the steering-only baseline
+**cannot complete the manoeuvre at all** — it departs the track with a peak
+lateral error of 30.5 m. With torque vectoring enabled, the same car finishes
+under both controllers. TV is not an optimisation here; it is the difference
+between completing the manoeuvre and leaving the road.
+
+<Figure
+  src={radarComparison}
+  alt="Radar chart comparing the best controller per vehicle across five normalised metrics: the Model 3 with PID-TV is stronger on lateral error, the Camry with LQR-TV is stronger on yaw-rate error and lateral acceleration."
+  figNumber="4"
+  caption="Best controller per vehicle: PID-TV suits the Model 3’s tracking-first profile; LQR-TV suits the Camry — closer to centre is better."
+  widths={[768, 1280]}
+/>
+
+## Limitations
+
+All results are for a single speed, friction level and manoeuvre severity, with
+no sensor noise. The Camry ran with Model-3-tuned gains, so its numbers
+understate what vehicle-specific tuning would achieve. The LQR gain schedule is
+a discrete 5 km/h grid, and the reference filter's lag partially decouples
+yaw-rate tracking from path-tracking quality.
+
+## Lessons learned
+
+- **A second actuator changes the problem class.** For the understeering
+  vehicle, TV moved the outcome from _failure_ to _completion_ — no amount of
+  steering-gain tuning does that.
+- **PID vs LQR is a trade, not a ranking.** Best lateral tracking (PID) and
+  best comfort/yaw response (LQR) live in different controllers; the "best"
+  one depends on the vehicle and the objective.
+- **Saturation is a design surface.** Relaxing the torque limit improved yaw
+  error by 8.8% but _worsened_ lateral error by 6.5% — the controller operates
+  on a trade-off boundary, not below it.
+- **Always validate across plants.** The controller ranking flipped between the
+  two vehicles; a single-vehicle conclusion would have been wrong.

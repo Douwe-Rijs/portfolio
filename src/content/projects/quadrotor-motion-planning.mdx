@@ -1,0 +1,130 @@
+---
+title: 'Threading a Drone Through the Rubble'
+summary: 'RRT and RRT* motion planning with a dual-loop PID tracker, flying a simulated Crazyflie through narrow openings in cluttered disaster environments — and measuring exactly when it stops working.'
+role: 'Environment Generation & Results Analysis'
+timeframe: 'TU Delft · group project'
+teamSize: 4
+preset: 'gallery'
+contributions:
+  - 'Built the procedural environment-generation script: randomised walls and window-like openings with controllable dimensions for repeatable benchmark runs.'
+  - 'Extracted and analysed the results: success-rate and flight-time metrics across hole sizes, hole shapes and obstacle counts.'
+tech:
+  - 'Python'
+  - 'RRT / RRT*'
+  - 'PyBullet'
+  - 'PID Control'
+  - 'Motion Planning'
+categories:
+  - 'Robotics'
+  - 'Planning'
+featured: false
+order: 4
+heroImage: '../../assets/projects/quadrotor-motion-planning/rrt-star-tree.jpg'
+heroAlt: 'Simulation view of a quadrotor planning problem: hundreds of red RRT* sample points fill a checkered arena around two grey walls, with the final smooth green path threading through a narrow gap between them.'
+links: {}
+results:
+  - { label: 'Planners compared', value: 'RRT vs RRT*' }
+  - { label: 'Waypoints per edge', value: '100' }
+  - { label: 'Success driver', value: 'Hole area' }
+  - { label: 'Tracking', value: 'Dual-loop PID' }
+gallery:
+  - src: '../../assets/projects/quadrotor-motion-planning/rrt-tree.jpg'
+    alt: 'RRT exploration in simulation: a dense cloud of red sample crosses around two wall obstacles, with a jagged green path found through the gap.'
+    caption: 'RRT — a dense, undirected sample cloud and a jagged final path.'
+  - src: '../../assets/projects/quadrotor-motion-planning/rrt-star-tree.jpg'
+    alt: 'RRT* exploration of the same scene: fewer, better-organised samples and a visibly smoother green path through the wall openings.'
+    caption: 'RRT* on the same scene — rewiring produces a smoother path with fewer waypoints.'
+  - src: '../../assets/projects/quadrotor-motion-planning/success-heatmap.jpg'
+    alt: 'Heatmap of success rate binned by hole width and height, ranging from under 0.2 for the smallest holes to 0.7 for the widest and tallest, with success concentrating toward larger widths.'
+    caption: 'Success rate by hole width × height: width helps more than height — the drone is wider than it is tall.'
+  - src: '../../assets/projects/quadrotor-motion-planning/success-vs-hole.jpg'
+    alt: 'Line plot of success rate against hole area, rising roughly linearly from about 0.13 at 0.12 square metres to 0.70 at the largest openings.'
+    caption: 'Success rises roughly linearly with hole area, approaching reliable flight for the largest openings.'
+  - src: '../../assets/projects/quadrotor-motion-planning/flighttime-rrt.jpg'
+    alt: 'RRT flight time versus number of walls: mean flight time grows from about 6 seconds with two walls to about 11.5 seconds with four, with wide error bars.'
+    caption: 'RRT flight times grow quickly with environment difficulty…'
+  - src: '../../assets/projects/quadrotor-motion-planning/flighttime-rrt-star.jpg'
+    alt: 'RRT* flight time versus number of walls: mean flight time grows from about 3.8 seconds with two walls to about 6 seconds with four — roughly half the RRT times.'
+    caption: '…while RRT* completes the same courses in roughly half the time.'
+  - src: '../../assets/projects/quadrotor-motion-planning/flighttime-vs-hole.jpg'
+    alt: 'Mean flight time versus hole area for successful runs, decreasing from about 9.5 seconds for the smallest holes to about 6.5 seconds for the largest.'
+    caption: 'Smaller holes cost time even when they succeed: tighter passages force longer, more cautious paths.'
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+## Overview
+
+A four-person TU Delft project on motion planning for quadrotor delivery in
+constrained disaster environments: after an earthquake or collapse, a drone
+must carry supplies through rubble, doorways and half-blocked windows to reach
+people a ground vehicle cannot. We combined **RRT and RRT\*** global planners
+with a **dual-loop PID (DSLPID)** trajectory tracker on a simulated Crazyflie
+quadrotor in PyBullet, and benchmarked systematically: _how narrow can the gap
+get before planning fails?_
+
+My part was the **experiment infrastructure**: a procedural environment
+generator producing randomised walls with window-like openings of controllable
+width and height, and the **results analysis** turning hundreds of runs into
+the plots below.
+
+## The problem
+
+Sampling-based planners are probabilistically complete — given infinite
+samples, they find a path if one exists. Disaster response doesn't have
+infinite samples. **Narrow passages** are their known weakness: uniform random
+sampling rarely lands useful points inside a small opening, so planning time
+explodes exactly where the mission is hardest. We wanted the failure boundary
+as a measured curve, not an anecdote.
+
+## Approach
+
+- **Planning space:** 3D position only, with obstacles padded by the drone's
+  radius — a point-mass abstraction that keeps planning fast while the
+  controller absorbs the dynamics.
+- **RRT vs RRT\*:** identical sampling; RRT\* additionally rewires the tree
+  within a search radius toward lower path cost.
+- **Tracking:** each planned edge is discretised into 100 waypoints and fed to
+  the DSLPID position/attitude cascade, running on full rigid-body dynamics in
+  `gym-pybullet-drones`.
+- **Benchmark:** randomised environments sweeping hole width, height and the
+  number of walls; metrics are success rate and flight time on successful runs.
+
+## What the data says
+
+Three findings stand out from the gallery above:
+
+**Success is a function of hole area — and shape.** Success rate climbs
+roughly linearly with hole area, and the width × height heatmap shows width
+matters more than height: the drone is wider than it is tall, so wide-short
+openings pass where tall-narrow ones fail.
+
+**RRT\* wins on path quality, not on reachability.** Both planners succeed at
+comparable rates, but RRT\*'s rewiring yields smoother paths with fewer
+waypoints — and roughly **half the flight time** of RRT on harder maps, with
+far less sensitivity to hole size. RRT's flight times grow steeply as gaps
+shrink; RRT\*'s barely move.
+
+**Tight gaps cost time even when they work.** On successful runs, mean flight
+time falls from ~9.5 s for the smallest holes to ~6.5 s for the largest — the
+controller slows and corrects more in confined space.
+
+## Limitations
+
+Static environments only — a changed world means replanning from scratch. The
+simulation assumes perfect state information (no sensor noise), sampling is
+uniform (informed/targeted sampling was consciously left out to keep the
+comparison general), and nearest-neighbour search is O(n) where a KD-tree
+would cut it to O(log n).
+
+## Lessons learned
+
+- **Measure the failure boundary.** "RRT struggles in narrow passages" became a
+  concrete, reproducible curve: below ~0.17 m² of opening, success drops under
+  15%.
+- **Asymptotic guarantees ≠ practical performance.** Probabilistic completeness
+  says nothing about the sample budget a real mission can afford.
+- **Geometry is a design input.** The width-vs-height asymmetry says: match the
+  drone's cross-section to the openings you expect, or pay in success rate.
+- **Separate planning from tracking.** The point-mass + padding + PID split kept
+  each layer simple, at the cost of conservatism in genuinely tight spaces.

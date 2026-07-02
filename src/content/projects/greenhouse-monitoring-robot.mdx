@@ -1,0 +1,185 @@
+---
+title: 'A Greenhouse That Watches Itself'
+summary: 'An autonomous ROS 2 monitoring robot on the MIRTE Master platform that maps a greenhouse, inspects every flower bed and streams plants, pests and climate into a live digital twin.'
+role: 'Decision-Making & Software Management'
+timeframe: '2026 · 8 weeks'
+teamSize: 5
+preset: 'motion'
+contributions:
+  - 'Focused on the robot’s decision-making: the yasmin-based state machine orchestrating navigation, scanning, fault recovery and battery-triggered return-to-dock.'
+  - 'Managed the GitLab issue board and branch/review workflow for the five-person team.'
+  - 'Co-developed and validated the integrated system across simulation and the real MIRTE Master robot.'
+tech:
+  - 'ROS 2'
+  - 'Nav2'
+  - 'SLAM Toolbox'
+  - 'YOLOv8'
+  - 'Python'
+  - 'AprilTags'
+  - 'Gazebo'
+categories:
+  - 'Robotics'
+  - 'Perception'
+featured: true
+order: 3
+heroImage: '../../assets/projects/greenhouse-monitoring-robot/hero-mirte.jpg'
+heroAlt: 'The MIRTE Master robot: a blue four-wheeled mobile base with mecanum wheels, a depth camera at the front and a black articulated camera arm mounted on top.'
+links: {}
+results:
+  - { label: 'Mandatory requirements', value: '7 of 8 met' }
+  - { label: 'Climate signals per bed', value: '5' }
+  - { label: 'Arena traversal + loop closure', value: 'Passed' }
+  - { label: 'Team', value: '5 engineers' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import flowersRaw from '../../assets/projects/greenhouse-monitoring-robot/flowers-raw.jpg';
+import flowersDetected from '../../assets/projects/greenhouse-monitoring-robot/flowers-detected.jpg';
+import uiMapping from '../../assets/projects/greenhouse-monitoring-robot/ui-mapping.jpg';
+import uiHistogram from '../../assets/projects/greenhouse-monitoring-robot/ui-flower-histogram.jpg';
+import apriltag from '../../assets/projects/greenhouse-monitoring-robot/apriltag-detection.jpg';
+import rosArch from '../../assets/projects/greenhouse-monitoring-robot/ros-architecture.jpg';
+import uiSystem from '../../assets/projects/greenhouse-monitoring-robot/ui-system.jpg';
+
+## Overview
+
+For the TU Delft Multidisciplinary Project (RO47007), a five-person team built an
+autonomous greenhouse-monitoring robot for the fictitious client _Flora Nova_.
+Built on the **MIRTE Master** platform, the robot maps the greenhouse with SLAM,
+navigates autonomously between flower beds, detects **flowers and pests** with
+an onboard neural network, reads **per-bed climate data** via AprilTags, and
+streams everything into a live web-based **digital twin** — with tele-operation
+override always one click away.
+
+## The problem
+
+Manual greenhouse monitoring is slow, inconsistent and reactive: by the time a
+pest infestation is noticed on a scheduled round, it has often spread. The
+client asked for a robot that monitors plant growth and environmental
+conditions **continuously**, navigates safely among narrow paths, plants and
+people, and makes its own state fully transparent to staff — remotely via a
+dashboard, and on the spot via lights and speech.
+
+## Architecture
+
+The system is a ROS 2 node graph on top of the MIRTE Master. A custom
+**state machine** (built on `yasmin`) orchestrates everything: it dispatches
+routes to a custom global planner feeding **Nav2**, triggers the camera-arm
+scanning poses on arrival, monitors battery and faults, and owns the
+return-to-dock behaviour. Perception runs in parallel — a **YOLOv8** detector
+(single inference per frame for both flowers and bugs), an **AprilTag** reader
+for per-bed climate lookup, and an aggregator that deduplicates detections into
+per-bed summaries for the digital twin.
+
+<Figure
+  src={rosArch}
+  alt="SysML internal block diagram of the ROS 2 system: an operator interface and state machine command a custom greenhouse navigation node, Nav2 and the MIRTE base controller, while a perception package with flower detector, flower processor and AprilTag detector processes the gripper camera, and mirte_slam fuses RPLidar scans for localisation."
+  figNumber="1"
+  caption="The ROS 2 architecture. Red-outlined packages are self-developed; the state machine orchestrates navigation, scanning and fault recovery."
+  widths={[768, 1280, 1920]}
+/>
+
+Design decisions leaned deliberately on proven components: Nav2 and the
+platform's SLAM stack were reused rather than rebuilt ("re-developing this
+would consume the majority of the project budget without outperforming existing
+solutions"), while the mission logic, planner, perception pipeline and
+interface — the parts specific to this problem — were custom.
+
+## Seeing the flowers
+
+The gripper camera feeds a YOLOv8 model that detects tulips (by colour) and
+bugs in the same pass. Detections are aggregated with an IoU threshold of 0.45
+and centre-pixel analysis to stop one flower being counted five times as the
+robot drives past.
+
+<Compare
+  one={flowersRaw}
+  two={flowersDetected}
+  altOne="Raw gripper-camera image of a wooden flower bed with white, yellow and pink artificial tulips and a bug marker on the side panel."
+  altTwo="The same flower bed image overlaid with YOLOv8 bounding boxes labelling white, pink and red tulips with confidence scores up to 0.93 and a bug detected at 0.90."
+  labelOne="Gripper camera"
+  labelTwo="YOLOv8"
+/>
+
+Tuning mattered more than architecture here: the confidence threshold sits low
+(0.25) to survive poor camera conditions and odd flower poses, the detector was
+throttled so it stopped starving the rest of the compute, and the robot's
+driving speed was lowered so hidden bugs still get enough frames to be caught.
+
+## The digital twin
+
+Everything the robot knows lands in one browser dashboard: the live SLAM map
+and robot pose, camera feeds, per-bed flower histograms with heights and
+colours, pest flags, climate history for every scanned AprilTag, battery,
+system log and a 3D view. Operators can drag bed markers onto the map, dispatch
+the robot to any bed with one click, or take direct manual control.
+
+<FullBleed
+  src={uiMapping}
+  alt="The MIRTE digital twin web interface in mapping mode: a live occupancy grid built from lidar scans in the centre, teleoperation arrows and speed sliders on the right, and a checklist showing the robot boot sequence completing."
+  ratio="aspect-[16/9]"
+  caption="The digital twin during mapping: live occupancy grid, teleop controls and the robot's boot sequence in one view."
+/>
+
+<Split src={uiHistogram} alt="Flower histogram panel from the digital twin showing seven detected tulips with individual heights in centimetres, one flagged red, alongside the raw JSON scan data with per-flower confidence and centre-pixel coordinates." caption="Per-bed scan results: individual flower heights, colours and a pest flag, backed by the raw detection data." reverse>
+
+Each completed scan produces a deduplicated per-bed inventory — flower count,
+colour, individual heights, health flags — that the operator can audit down to
+the raw JSON. When a bug is detected, the bed is flagged in the interface
+(requirement OR4), turning the robot from a camera on wheels into an early
+pest-warning system.
+
+</Split>
+
+<Figure
+  src={apriltag}
+  alt="Gripper-camera view of a flower bed with a green overlay box around a detected AprilTag labelled ID 4."
+  figNumber="2"
+  caption="AprilTags identify each bed and link it to live climate readings — CO2, humidity, light, soil moisture and temperature."
+/>
+
+## Validation
+
+Eight structured tests covered teleoperation, SLAM, navigation, both detection
+pipelines, the UI, the HMI hardware and obstacle avoidance:
+
+- **SLAM (T2):** a full traversal of the ten-row arena on real hardware, with
+  loop closure, produced an occupancy grid closely matching the physical layout.
+- **Detections (T4/T5):** reliable flower and bug detection within a single
+  scanning pass; five unique AprilTags identified with all five climate
+  readings correctly displayed.
+- **Obstacle avoidance (T8):** the robot reliably stopped for people walking
+  into its path and replanned around static obstacles, fusing 2D lidar with
+  depth-camera data — with a known edge case for low-lying objects below the
+  lidar's scan height.
+- **Navigation (T3):** passed in simulation; on the real robot, full autonomous
+  route execution was blocked by an integration error — the honest reason MR4
+  is scored _partially met_.
+
+The final tally: **seven of eight mandatory requirements met**, the eighth
+partially, plus most optional ones. One hardware war story: the LED strip
+short-circuited and took the onboard microcontroller with it — LED state
+signalling works in software, but demo day ran on speech audio alone.
+
+<FullBleed
+  src={uiSystem}
+  alt="System tab of the digital twin showing battery at 60 percent, live front and gripper camera feeds, node health indicators for rosbridge and the base controller, connection settings and a scrolling system log with per-tag climate readings."
+  ratio="aspect-[16/9]"
+  caption="The system view: battery, dual camera feeds, node health and a live log — the robot's complete state in one screen."
+/>
+
+## Lessons learned
+
+- **Integrate early, not at the end.** The team's biggest design change was
+  abandoning a big-bang integration in favour of developing features that work
+  independently in parallel — the one that didn't fully merge (real-robot Nav2
+  execution) is exactly where the remaining gap lives.
+- **Reuse buys you the interesting problems.** Standing on Nav2, SLAM Toolbox
+  and apriltag_ros left the budget for the state machine, perception tuning and
+  a digital twin that actually feels like a product.
+- **Transparency is a feature, not a report chapter.** The dashboard, LEDs and
+  speech weren't polish — they were what made a robot among people acceptable.
+- **Hardware fails on its own schedule.** A short circuit two weeks before demo
+  day is a risk model, not an anecdote.

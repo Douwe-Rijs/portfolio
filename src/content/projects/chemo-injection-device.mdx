@@ -1,0 +1,137 @@
+---
+title: 'Taking the Strain Out of Chemotherapy Injections'
+summary: 'A 3D-printed constant-force injector that replaces 3–5 minutes of sustained manual pressure per Daratumumab injection — designed, built and validated with clinicians at a Dutch hospital.'
+role: 'Mechanical Design & Validation (BSc thesis)'
+timeframe: 'BSc End Project · TU Delft'
+teamSize: 4
+preset: 'editorial'
+theme:
+  accent: '#b45309'
+  accentDark: '#fbbf24'
+contributions:
+  - 'Co-designed and validated the constant-force injector as a four-person Bachelor End Project team, from force measurements and Hagen–Poiseuille modelling through prototyping and clinical feedback at Reinier de Graaf Hospital.'
+tech:
+  - 'SolidWorks'
+  - '3D Printing'
+  - 'FEM'
+  - 'Mechanical Design'
+  - 'Medical Devices'
+categories:
+  - 'Design'
+featured: false
+order: 6
+heroImage: '../../assets/projects/chemo-injection-device/cfi-prototype.jpg'
+heroAlt: 'The 3D-printed constant-force injector prototype: a black printed housing holding a BD Plastipak syringe with safety needle, driven by a white constant-force spring drum mounted on top.'
+links: {}
+results:
+  - { label: 'Nurse force replaced', value: '~30 N' }
+  - { label: 'Manual effort', value: '3–5 min → 0' }
+  - { label: 'Repeatability trials', value: '5/5 consistent' }
+  - { label: 'Clinical feedback', value: 'Hospital-tested' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-02
+---
+
+import forceTest from '../../assets/projects/chemo-injection-device/force-test.jpg';
+import cfiImprovements from '../../assets/projects/chemo-injection-device/cfi-improvements.jpg';
+import honeyWaterTest from '../../assets/projects/chemo-injection-device/honey-water-test.jpg';
+
+## Overview
+
+Daratumumab (Darzalex), a monoclonal antibody used against multiple myeloma, is
+injected subcutaneously: 15–20 mL pushed by hand over **3–5 minutes of
+continuous pressure**. Nurses administering it several times a day report
+serious strain in hand, wrist and forearm. For our Bachelor End Project at
+TU Delft — in collaboration with **Reinier de Graaf Hospital** — our
+four-person team designed, built and validated a device that takes that load
+off the caregiver entirely: a 3D-printed **Constant Force Injector (CFI)**.
+
+## The problem, quantified
+
+Before designing anything, we measured the job. A test rig — syringe, scale,
+collection bag and a honey–water mixture matched to the drug's estimated
+viscosity — showed a nurse must sustain roughly **3 kg (~30 N)** of plunger
+force to hit the target flow rate, for minutes at a time.
+
+<Figure
+  src={forceTest}
+  alt="Line chart of four manual injection force trials: scale readings fluctuate mostly between 2000 and 4000 grams over more than 200 seconds, with visible spikes and dips across all four tests."
+  figNumber="1"
+  caption="Four manual-injection trials on the test rig: ~3 kg of sustained force, with the variability of a human hand plainly visible."
+  widths={[768, 1280]}
+/>
+
+The physics backed the measurement: modelling the needle flow with the
+**Hagen–Poiseuille equation** put the required force in the 5–50 N range
+depending on tissue back-pressure, and a water-only validation run landed
+within half a second of theory (30.8 s measured vs 30.3 s predicted).
+
+## Design decisions
+
+From a morphological analysis, two concepts were prototyped and taken to the
+hospital: an elastic assist ("Elastico") that supplements finger force, and the
+**CFI**, in which a pre-tensioned **constant-force spring** drives the plunger
+autonomously. Clinical feedback was decisive — the elastic concept was
+uncomfortable in exactly the way the current process is, while the CFI removed
+the effort altogether. The workflow: tension the spring with a lever, clamp the
+standard BD Luer-Lock syringe, insert the needle, release.
+
+<Split src={cfiImprovements} alt="The constant-force injector prototype with red annotations marking redesigned regions: the spring drum rim, the syringe clamp area and the trigger block on the housing side." caption="Clinical and bench feedback drove the redesign: click-and-twist syringe clamping, a spring-loaded hook replacing the fiddly pin, and graduation marks for visual rate feedback." reverse>
+
+The refinement round is where the design matured: the syringe holder gained a
+**click-and-twist** clamp so the syringe cannot eject under load, the manual
+locking pin became a **spring-loaded hook** that locks automatically when
+tensioned, and graduation marks along the shaft let the nurse verify at a
+glance that the injection is proceeding at constant speed. Every part except
+the spring prints in PLA, with each component oriented so its maximum load runs
+perpendicular to the print layers.
+
+</Split>
+
+## Validation — honest numbers
+
+The prototype's repeatability was its strongest result: **five consecutive
+trials produced nearly overlapping volume–time curves**, markedly more
+consistent than the manual injections measured earlier. The spring delivers its
+force linearly, cycle after cycle — the manufacturer rates it for 8,000
+cycles, which at five injections a day is over four years of service.
+
+<Figure
+  src={honeyWaterTest}
+  alt="Line chart of the honey-water duration test: injected volume rises almost linearly with time, reaching 15 millilitres at about 475 seconds."
+  figNumber="2"
+  caption="The honey–water duration test: beautifully linear delivery — but at 7 min 55 s, well over the 3–5 minute target."
+  widths={[768, 1280]}
+/>
+
+The duration test is where honesty matters. Against a 3–5 minute target, the
+CFI delivered the 15 mL surrogate in **7 minutes 55 seconds**. A water-only
+null test isolated the causes: internal friction in the drum-and-shaft
+mechanism eats a measurable share of the spring force (45 s measured vs ~30 s
+theoretical), and the actual viscosity of Daratumumab is — remarkably —
+**unavailable**: neither the manufacturer nor the hospital pharmacy could
+provide it, so our surrogate was calibrated to an estimate. The device works;
+its spring must be re-specified against the real drug.
+
+## Regulatory path
+
+As a device intended for in-house hospital use, the CFI targets the **MDR
+Article 5.5** exemption — with its documentation, safety and post-market
+surveillance duties — rather than a commercial CE route. Sterilisation is the
+honest weak point: porous PLA degrades under repeated 70% ethanol cleaning,
+which caps the printed housing's life at roughly one to three years (about €2
+of material and 12 hours of printing to replace) and motivates resin printing
+or coatings as follow-up work.
+
+## Lessons learned
+
+- **Measure the task before designing for it.** The 30 N figure anchored every
+  downstream decision, from spring selection to FEM load cases.
+- **Clinical feedback beats desk criteria.** The concept that scored well on
+  paper was rejected in minutes by the people who would use it.
+- **Friction is a first-class design load.** The gap between theoretical and
+  actual delivery time was mostly mechanism friction — predictable in
+  hindsight, measured too late.
+- **Missing data is a finding.** That a drug's viscosity is unavailable even to
+  the hospital pharmacy defines the next iteration's first experiment.
