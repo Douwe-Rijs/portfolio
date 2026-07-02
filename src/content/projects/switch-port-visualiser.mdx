@@ -47,6 +47,7 @@ import panelScreenshot from '../../assets/projects/switch-port-visualiser/panel-
 import cisco29xx from '../../assets/projects/switch-port-visualiser/cisco-29xx-svg.png';
 import cisco37xx from '../../assets/projects/switch-port-visualiser/cisco-37xx-svg.png';
 import releasePipeline from '../../assets/projects/switch-port-visualiser/release-pipeline.png';
+import architectureDiagram from '../../assets/projects/switch-port-visualiser/architecture.jpg';
 
 ## Overview
 
@@ -58,10 +59,12 @@ live **SNMP colour data** on each port (red = down, green = up), and opens a
 detail panel when you click any port — throughput, VLAN, operational and admin
 status, MAC address and the name of the connected device via LLDP/CDP.
 
-<FullBleed
+<Figure
   src={panelScreenshot}
   alt="Grafana Network Monitoring dashboard showing two stacked Cisco Catalyst 3750 switches rendered with live SNMP data. Most ports are coloured red indicating no link; a selected blue port shows port information below including 1.83 Mb/s throughput, VLAN 1, enabled admin status and the hostname of the connected device."
   caption="Two Catalyst 3750 stacks in the live dashboard — every port coloured by status, selected port's data panel below."
+  widths={[768, 1200, 1600]}
+  sizes="(min-width: 1152px) 1088px, 100vw"
 />
 
 ## The problem
@@ -90,6 +93,17 @@ Each port shows six SNMP fields — `ifDescr`, `vmVlan`, `ifOperStatus`,
 remote system name, description and chassis MAC. A Python sidecar running on
 the cluster watches the MinIO bucket and triggers data rotation when a new
 SNMP snapshot arrives.
+
+<Figure
+  src={architectureDiagram}
+  alt="System architecture diagram: a network switch feeds data to Telegraf, which writes to both Prometheus and a MinIO bucket, all inside a Kubernetes dashed boundary. Grafana reads from both stores and pushes alerts to Microsoft Teams and directly to crew and office personnel."
+  figNumber="1"
+  caption="End-to-end pipeline: SNMP → Telegraf → Prometheus + MinIO (Kubernetes) → Grafana → crew."
+  widths={[768, 1200, 1600]}
+  sizes="(min-width: 1152px) 1088px, 100vw"
+  bordered={false}
+  class="rounded-token bg-surface p-6"
+/>
 
 ## The plugin: matching OIDs to switch images
 
@@ -132,7 +146,7 @@ triggering a full page refresh.
 <Figure
   src={releasePipeline}
   alt="Azure Pipelines flow diagram: create PR, check for conventional commit title, complete merge to release branch, build plugin, create semantic version tag, upload zip to MinIO."
-  figNumber="1"
+  figNumber="2"
   caption="The release pipeline: conventional commits drive automatic versioning and deployment to Grafana via MinIO."
 />
 
