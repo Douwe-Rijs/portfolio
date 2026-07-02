@@ -47,10 +47,18 @@ const parsed = items.map((m) => ({
 
 {
   variant === 'bold' ? (
-    <dl class={`not-prose grid grid-cols-2 gap-8 sm:grid-cols-4 ${className}`}>
+    <dl class={`not-prose grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 ${className}`}>
       {parsed.map((m) => (
-        <div>
-          <dd class="display-lg text-ink">
+        <div class="min-w-0">
+          {/* Short numeric values earn display scale; word values step down so
+              they never collide with neighbouring cells. */}
+          <dd
+            class={`font-display text-ink ${
+              m.num && m.value.length <= 10
+                ? 'text-4xl sm:text-5xl'
+                : 'text-3xl leading-tight text-balance sm:text-4xl'
+            }`}
+          >
             {m.num ? (
               <AnimatedNumber
                 client:visible
@@ -63,7 +71,7 @@ const parsed = items.map((m) => ({
               m.value
             )}
           </dd>
-          <dt class="mt-1 font-mono text-xs tracking-wider text-muted uppercase">{m.label}</dt>
+          <dt class="mt-2 font-mono text-xs tracking-wider text-muted uppercase">{m.label}</dt>
         </div>
       ))}
     </dl>
