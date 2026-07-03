@@ -1,0 +1,195 @@
+---
+title: 'Argus: One Front Door to Every Vessel Signal'
+summary: 'A Go + Grafana platform that gives Allseas one structured, browsable catalogue of all datalogger time-series — 21,000+ signals per vessel, discovered, described and previewable in place.'
+role: 'R&D Engineer — Backend & Platform'
+timeframe: 'Allseas'
+preset: 'technical'
+contributions:
+  - 'Built API features across the Go backend: RFC 9457 error handling, OpenAPI request validation, a Prometheus /metrics endpoint and structured request logging with Grafana usernames.'
+  - 'Refactored the InfluxQL query builder onto the official influxql AST library, and reworked the endpoint to return the AST so the Grafana datasource can construct queries natively.'
+  - 'Added a legacy-ID resolution endpoint that maps historical vessel parameter IDs to signal UUIDs, keeping years of old references usable.'
+  - 'Built Grafana app features: signal-class tabs, lexicographically sorted filters, an interactive guided tour, and a live time-series preview panel for browsing signals.'
+  - 'Simplified the UI vocabulary and layout after user feedback — flat lists and plain terms instead of nested hierarchies and jargon.'
+  - 'Created the Azure DevOps CI/CD pipelines for the API, exporter and Grafana app.'
+skills:
+  - 'Go API design (OpenAPI-first)'
+  - 'Grafana app plugin development'
+  - 'PostgreSQL & type-safe SQL (sqlc)'
+  - 'Observability (OpenTelemetry, Prometheus)'
+  - 'CI/CD (Azure Pipelines, Helm)'
+  - 'User-feedback-driven UI iteration'
+tech:
+  - 'Go'
+  - 'PostgreSQL'
+  - 'React'
+  - 'TypeScript'
+  - 'Grafana Scenes'
+  - 'InfluxDB'
+  - 'OpenAPI'
+  - 'sqlc'
+  - 'OpenTelemetry'
+  - 'Azure Pipelines'
+takeaways:
+  - 'Code generation from a single source of truth (SQL schema + OpenAPI spec) kept a 36-endpoint API coherent while it grew — handlers stayed thin, drift stayed impossible.'
+  - 'Returning an AST instead of a query string turned a brittle string-passing interface into a structured contract between backend and Grafana.'
+  - 'Users don''t care about your data model''s elegance — renaming "Channel Class" to plain language and flattening hierarchies did more for adoption than any feature.'
+categories:
+  - 'Software'
+  - 'Infrastructure'
+featured: true
+order: 3
+heroImage: '../../assets/projects/argus-datalogger-platform/hero-signals-explorer.png'
+heroAlt: 'The Argus signal explorer in Grafana: a dark table of 21,344 signals on the vessel Audacia filtered by channel, with an inspector panel for act_gearbox_temp showing its attributes and a live one-hour time-series preview of gearbox temperature.'
+forceTheme: 'dark'
+links:
+  repo: 'https://dev.azure.com/Allseas/Innovations/_git/DLG_argus'
+results:
+  - { label: 'Signals unified per vessel', value: '21,000+' }
+  - { label: 'Legacy parameter IDs', value: 'Still resolvable' }
+  - { label: 'API errors', value: 'RFC 9457, traceable' }
+  - { label: 'Release stage', value: 'Fleet beta' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-03
+---
+
+import heroSignals from '../../assets/projects/argus-datalogger-platform/hero-signals-explorer.png';
+import homeDataModel from '../../assets/projects/argus-datalogger-platform/home-data-model.png';
+import metadataModel from '../../assets/projects/argus-datalogger-platform/metadata-model.png';
+import codegenWorkflow from '../../assets/projects/argus-datalogger-platform/codegen-workflow.png';
+
+## Overview
+
+Every Allseas vessel streams sensor data into InfluxDB: thruster power,
+winch temperatures, positions, flows — tens of thousands of series per ship.
+InfluxDB is superb at storing that data and terrible at explaining it. What
+_is_ `AU-433X0.winch,winch=S4`? What unit? Which physical device? Which other
+vessels have the same sensor?
+
+**Argus** answers those questions. It is a metadata platform — a Go REST API
+over PostgreSQL, a Grafana app plugin, and an exporter that discovers what
+exists in InfluxDB — that gives engineers and data scientists one structured,
+searchable front door to every signal in the fleet. I built features across
+all three components, from error-handling middleware to the guided tour.
+
+## The problem
+
+The raw time-series database has no opinion about structure. Measurement and
+tag names encode meaning by convention only, units live in people's heads,
+and a decade of legacy "parameter IDs" from the previous datalogger
+generation still circulate in reports and scripts. Finding the right series
+meant asking the person who set up the logger — a process that does not scale
+across a fleet.
+
+The goal: a **single metadata model** describing what every series _is_ —
+its device, class, unit and data type — kept automatically in sync with what
+actually exists in InfluxDB, and browsable by anyone with Grafana access.
+
+## The data model: two parallel trees
+
+The core design organises everything into a schema tree (what kinds of data
+exist) and an instance tree (the concrete devices and their values). A
+_signal class_ like "gearbox temperature, float, °C" is defined once; each
+winch on each vessel then has a concrete _signal_ instance of it. That
+one-to-many structure is what lets a data scientist ask "give me this
+temperature on every vessel" without knowing any vessel's tag conventions.
+
+<Figure
+  src={homeDataModel}
+  alt="The Argus home page in Grafana: the Datalogger Argus logo above a site selector, and a Data Model section explaining Channel Classes, Signal Classes, Channels and Signals as two parallel trees of schema and instances."
+  figNumber="1"
+  caption="The app's home page teaches the model before you browse it — with a guided tour one click away."
+/>
+
+<Figure
+  src={metadataModel}
+  alt="Entity-relationship diagram of the Argus metadata schema: signals, signal classes, channels, channel classes, data sources and sites on one side, linked to influx series, fields, tag keys, tag values, measurements, buckets and servers on the other."
+  figNumber="2"
+  caption="The full metadata schema: the class/instance hierarchy on the left, mapped onto InfluxDB's physical structure on the right."
+  bordered={false}
+  class="rounded-token bg-white p-4"
+/>
+
+## An API that cannot drift from its spec
+
+The backend is OpenAPI-first: the spec and the SQL schema are the sources of
+truth, and `oapi-codegen` + `sqlc` generate the server interfaces and
+type-safe query code from them. Handlers contain only business logic. I
+leaned into that discipline for every feature I added:
+
+- **RFC 9457 error responses.** A composable error-handler chain converts
+  every failure — schema-validation errors included — into a structured
+  problem object with a unique `ARGUS-…` code. The full stack trace is
+  logged server-side under the same code, so a user screenshot is enough to
+  find the exact failure in the logs.
+- **Observability.** A `/metrics` endpoint (OpenTelemetry → Prometheus)
+  plus HTTP request logging that includes the Grafana username, feeding an
+  operations dashboard of status-code counts.
+- **Transactions.** A generic `QueryTransactionManager` gives every handler
+  the same begin/commit/rollback discipline, with read-only transactions at
+  repeatable-read isolation for queries.
+
+<Figure
+  src={codegenWorkflow}
+  alt="Workflow diagram: a developer updates the OpenAPI spec and SQL migrations; oapi-codegen generates HTTP types, client and server boilerplate for the API and the Grafana app, while sqlc generates the SQL repository layer; the developer implements only the endpoint handlers."
+  figNumber="3"
+  caption="One `go generate` regenerates the HTTP layer, the SQL layer and the app-plugin client from the spec and schema."
+  bordered={false}
+  class="rounded-token bg-white p-4"
+/>
+
+## From query strings to ASTs
+
+Grafana needs to turn a signal class into a real InfluxQL query. The first
+version built query strings by hand — fragile, and reviewers agreed it was
+the wrong interface. I rewrote it on the official `influxql` AST library:
+the endpoint now parses and returns the **abstract syntax tree** of the
+query, which the Grafana datasource converts into its native query parts.
+Grafana injects its own time filter at runtime; nothing is string-spliced.
+
+The same thinking produced the **legacy-ID endpoint**: give it a vessel and
+an old datalogger parameter ID, get back the site and signal UUID. Years of
+existing references keep working against the new platform.
+
+## Making it usable, not just correct
+
+The first UI mirrored the database — hierarchies, "Channel Classes",
+auto-import flags. Real users found it opaque. I reworked it based on that
+feedback: flat lists instead of nested trees, plain names, jargon hidden or
+renamed, and an **interactive guided tour** through the app. Filters sort
+lexicographically; every table row opens an inspector with the signal's
+attributes and a **live time-series preview** — the fastest possible answer
+to "is this the series I want?"
+
+<FullBleed
+  src={heroSignals}
+  alt="The Argus signal explorer: a filtered table of winch gear-shift temperature signals on the vessel Audacia, with the inspector panel open on act_gearbox_temp showing its UUID, unit and legacy-ID attributes plus a live one-hour temperature graph with an Add to dashboard button."
+  caption="Browse, inspect, preview, add to dashboard — without leaving the table. One vessel alone holds 21,344 catalogued signals."
+  widths={[768, 1200, 1600]}
+  sizes="(min-width: 1152px) 1088px, 100vw"
+/>
+
+## Results
+
+Argus is in **beta on the fleet Grafana stack**, versioned at `/api/v3beta`
+with CI/CD pipelines I built deploying the API, exporter and app via Helm.
+A single vessel's catalogue already unifies over 21,000 signals, each
+discoverable by name, class or device and previewable in one click — a task
+that previously required knowing InfluxDB tag conventions by heart.
+
+Honest limits: it is still a beta. The UI-simplification work is ongoing —
+some renamings ("Signal Group", "Asset") are being rolled out iteratively,
+and the signal-activeness indicator users liked is not yet reliable enough
+to ship.
+
+## Lessons learned
+
+- **Generate the boring parts.** With the HTTP and SQL layers generated
+  from specs, code review focused on logic, and the API could grow to 36
+  endpoints without becoming inconsistent.
+- **Error handling is a user feature.** Structured problem objects with
+  correlatable codes turned "it's broken" support messages into one-line log
+  lookups.
+- **Ship vocabulary, not schema.** The data model's precision is essential
+  internally — and exactly what to hide from users. Plain words and flat
+  lists beat correctness in the interface.

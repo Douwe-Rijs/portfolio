@@ -21,6 +21,8 @@ tech:
   - 'SNMP'
   - 'Telegraf'
   - 'Prometheus'
+  - 'Loki'
+  - 'Grafana Alloy'
   - 'MinIO'
   - 'Azure Pipelines'
   - 'Docker'
@@ -149,6 +151,22 @@ triggering a full page refresh.
   figNumber="2"
   caption="The release pipeline: conventional commits drive automatic versioning and deployment to Grafana via MinIO."
 />
+
+## Beyond ports: logs and multiple networks
+
+Two follow-up projects grew the plugin into a broader network-observability
+stack. First, **syslog capture**: the switches' own event messages (link
+flaps, auth failures, config changes) now stream through **Grafana Alloy**
+into **Loki**, so the dashboard answers not just _what is down_ but _what
+the switch said when it went down_ — logs and port status side by side in
+the same Grafana view.
+
+Second, **multi-network support**: the original pipeline assumed one
+network. To monitor several vessels and networks simultaneously, each
+network's data carries a unique identifier through the Telegraf config, the
+panel plugin and the MinIO rotation script, with **CDP/LLDP discovery**
+feeding neighbour information back into the pipeline. Dashboard variables
+then split cleanly per vessel — one deployment, the whole fleet.
 
 ## Results
 

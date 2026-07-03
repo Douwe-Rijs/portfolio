@@ -1,0 +1,152 @@
+---
+title: 'Ship Logbooks, Drawn on the Graph'
+summary: 'A Grafana datasource plugin with a Go backend that overlays Bull logbook entries as annotations on any time-series panel — with per-user access control and vessel + shore deployments.'
+role: 'R&D Engineer — Full-Stack'
+timeframe: 'Allseas'
+preset: 'feature'
+contributions:
+  - 'Fixed the plugin so logbooks actually load when running on a vessel, and added a central-API mode so the same plugin works ashore.'
+  - "Built per-user access control: the plugin resolves the Grafana user against Bull's roles and only shows logbooks that person may see."
+  - 'Switched user identification from display names to e-mail-derived logins after display names proved ambiguous.'
+  - 'Added the cascading category selector, parameter-label filtering and regex-driven template variables.'
+  - 'Wrote the user manual on the internal docs site and shipped the v1.1.0 release.'
+skills:
+  - 'Grafana datasource plugin development'
+  - 'Go backend services'
+  - 'Enterprise auth integration (NTLM)'
+  - 'Access-control design'
+  - 'Technical writing'
+tech:
+  - 'Go'
+  - 'React'
+  - 'TypeScript'
+  - 'Grafana Plugin SDK'
+  - 'NTLM'
+  - 'REST'
+takeaways:
+  - 'Annotations are the highest-leverage Grafana feature nobody uses: overlaying human log entries on sensor data turns two separate records into one story.'
+  - "Access control belongs in the backend — the plugin enforces Bull's roles server-side per request, not in the browser."
+  - 'Identity mapping between systems is never trivial: display names collide; e-mail-derived logins ended a class of wrong-user bugs.'
+categories:
+  - 'Software'
+featured: false
+order: 6
+heroImage: '../../assets/projects/bull-logbook-datasource/hero-annotations.png'
+heroAlt: 'A dark Grafana time-series panel of welding data over a full day, overlaid with dozens of red dashed vertical annotation lines from the Bull logbook; a tooltip on one line shows a crew warning entry about a released vertical still shaking.'
+forceTheme: 'dark'
+links:
+  repo: 'https://dev.azure.com/Allseas/Innovations/_git/DLG_grafana_plugin_bull'
+results:
+  - { label: 'Logbook access', value: 'Broken on vessels → working' }
+  - { label: 'Visibility', value: 'Enforced per user role' }
+  - { label: 'Deployments', value: 'Vessel + shore, one plugin' }
+  - { label: 'Crew log + sensor data', value: 'One timeline' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-03
+---
+
+import annotationSettings from '../../assets/projects/bull-logbook-datasource/annotation-settings.png';
+import queryEditor from '../../assets/projects/bull-logbook-datasource/query-editor.png';
+import variableQuery from '../../assets/projects/bull-logbook-datasource/variable-query.png';
+
+## Overview
+
+Allseas crews keep operational logbooks in **Bull** — welding records, NDT
+inspections, engine-room events, warnings. Meanwhile the vessels' sensor
+data lives in Grafana dashboards. The two records describe the same reality
+and were never shown together: to explain a spike in a graph, you opened a
+second application and matched timestamps by hand.
+
+This plugin closes that gap. It is a Grafana **datasource plugin with a Go
+backend** that queries the Bull API and renders logbook entries as
+**annotations** — vertical markers drawn directly onto any time-series
+panel, each carrying the crew's own words.
+
+## The problem
+
+A first version of the plugin existed but had a blocking flaw: **on board a
+vessel, no logbooks appeared at all** — precisely where the data mattered
+most. Beyond that bug, everyone querying through a single shared account
+meant every Grafana user saw every logbook, regardless of what their Bull
+role allowed. And shore-side users had no way to use the plugin against the
+central Bull instance at all.
+
+## How it works
+
+The Go backend authenticates to the Bull API with NTLM (credentials in
+Grafana's encrypted secure storage — never in the browser) and exposes
+logbooks, categories and entries to the query editor. A data-repository
+layer caches logbook and category lists, deduplicates concurrent requests
+with `singleflight`, and refreshes user-role data every ten minutes.
+
+<Figure
+  src={queryEditor}
+  alt="The plugin's query editor row in Grafana: dropdowns for Logbook, Category and ParameterLabel, plus a toggle to combine parameters into one field."
+  figNumber="1"
+  caption="The query editor: pick a logbook, narrow by category chain and parameter label, or merge everything into one annotation stream."
+/>
+
+Two features I built define the plugin's current shape:
+
+**Per-user access control.** Each query carries the authenticated Grafana
+user. The backend maps that user to a Bull login and checks the requested
+logbook against their cached Bull roles — server-side, per request. A mate
+sees the deck log; they do not see logbooks their role excludes. Mapping
+identities across the two systems was its own bug hunt: display names were
+ambiguous, so the plugin now derives the login from the user's e-mail
+address.
+
+**Dual deployment.** The same plugin now talks to a vessel's local Bull
+instance or the central shore instance — a config toggle, two credential
+sets, one codebase. This is what made the plugin usable both on board and
+in the office.
+
+<Figure
+  src={annotationSettings}
+  alt="Grafana annotation configuration for Bull JLS data: the logbook Pioneering Spirit JLS selected with category and parameter filters, a successful test-query result of 48 events, and field mappings from logbook columns to annotation time, title and text."
+  figNumber="2"
+  caption="Wiring a logbook into a dashboard: the annotation query maps Bull's columns onto Grafana's annotation fields — title from the category, text from the crew's message."
+/>
+
+## Fitting Grafana's grain
+
+Rather than inventing custom panels, the plugin leans on Grafana's native
+machinery so logbooks behave like any other data:
+
+- **Annotations** render entries as time-anchored markers on existing
+  panels — no dashboard redesign needed.
+- **Template variables** let dashboard authors define regex-filtered
+  logbook or category variables, so one dashboard serves a whole fleet.
+- **Cascading category selection** mirrors Bull's category-chain hierarchy
+  in a single compact control.
+
+<Figure
+  src={variableQuery}
+  alt="Grafana variable editor using the Bull datasource: query type Logbooks with an optional regex expression, and a preview row of resulting values including Production Welding, Engine room log and Malta flag logbook."
+  figNumber="3"
+  caption="Logbooks as template variables: a regex carves the fleet's logbook list down to what a dashboard needs."
+/>
+
+## Results
+
+The plugin is released (v1.1.0) with vessel and central connectivity, and
+documented with a user manual on the internal docs site. Crews and
+office engineers see logbook entries in context on the graphs they already
+use: a red marker at the moment of a warning, the crew's exact words one
+hover away. The vessel bug that blocked on-board use is fixed, and logbook
+visibility now follows each user's actual Bull permissions.
+
+Honest limits: annotation density can get visually heavy on long time
+ranges (Grafana draws every marker), and the role cache means a permission
+change can take up to ten minutes to propagate.
+
+## Lessons learned
+
+- **Meet users inside their existing tool.** The entire value is that
+  nobody has to open a second application — the logbook comes to the graph.
+- **Shared service accounts are a liability.** Real per-user authorization
+  required backend enforcement and an identity-mapping strategy, not UI
+  filtering.
+- **Native extension points age best.** Annotations and template variables
+  survive Grafana upgrades; bespoke UI would not have.

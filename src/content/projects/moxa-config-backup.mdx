@@ -1,0 +1,126 @@
+---
+title: 'Version Control for Switch Configs'
+summary: "An Ansible pipeline that backs up every Moxa network device's configuration to git every six hours — sanitised, deduplicated, and resilient to any single device failing."
+role: 'R&D Engineer — Infrastructure'
+timeframe: 'Allseas'
+preset: 'minimal'
+contributions:
+  - 'Rewrote the original shell-script containers as a structured Ansible playbook pipeline.'
+  - 'Designed the commit-on-change flow: configs are diffed and only pushed when something actually changed.'
+  - 'Added a sanitisation pass that strips passwords and volatile fields before anything reaches git.'
+  - 'Fixed the ioLogik credential bug by detecting device models and passing usernames only to devices that accept them.'
+  - 'Eliminated a race condition between parallel config fetches by restructuring the plays per device group.'
+skills:
+  - 'Ansible & infrastructure as code'
+  - 'Docker & CI/CD (Azure Pipelines)'
+  - 'Network device administration'
+  - 'Defensive automation design'
+tech:
+  - 'Ansible'
+  - 'Docker'
+  - 'Kubernetes'
+  - 'Git'
+  - 'Bash'
+  - 'Azure Pipelines'
+takeaways:
+  - 'Config backups are only trustworthy if they are boring: idempotent runs, empty-commit suppression and per-device failure isolation made the pipeline something nobody thinks about.'
+  - 'Sanitise before you commit, not after — credentials that never enter git history never need scrubbing from it.'
+  - 'Hardware quirks beat clean abstractions: some Moxa models reject a username outright, so the playbook adapts per model instead of assuming uniformity.'
+categories:
+  - 'Infrastructure'
+featured: false
+order: 9
+heroImage: '../../assets/projects/moxa-config-backup/backup-sequence.png'
+heroAlt: 'Sequence diagram of the backup flow: every six hours a container on the cluster connects to each Moxa switch over SSH and mcc_tool, writes the exported configs to a directory, diffs them against git, and commits and pushes only when changes are found.'
+heroLayout: 'boxed'
+links:
+  repo: 'https://dev.azure.com/Allseas/Innovations/_git/DLG_Moxa_config_git'
+results:
+  - { label: 'Config rollback', value: 'None → any 6 h snapshot' }
+  - { label: 'Secrets in git history', value: 'Zero, by design' }
+  - { label: 'One device failing', value: 'No longer aborts the run' }
+  - { label: 'Shell scripts', value: 'Retired for Ansible' }
+gallery: []
+status: 'published'
+publishedDate: 2026-07-03
+---
+
+## Overview
+
+The Moxa switches, serial gateways and I/O converters in Allseas' datalogger
+networks are all writable by anyone with access — and a mistyped setting on
+a switch can silently take sensors offline. There was no record of what a
+device's configuration _was_, only what it currently _is_.
+
+This project gives every device a history: a containerised **Ansible
+pipeline** on the vessel cluster that exports each Moxa device's
+configuration every six hours and commits it to a git repository. Any
+config change becomes a diff; any bad change becomes a checkout.
+
+## The problem
+
+Rollback is only possible if you have something to roll back _to_. With
+dozens of devices per vessel across four product families — switches, NPort
+serial gateways, ioLogik I/O units and MGate converters — manual config
+exports were never going to happen on schedule. The backup had to be fully
+automatic, and safe enough to run unattended: no plaintext credentials in
+git, no noise commits, and no single unreachable device killing the run
+for everything else.
+
+## Design decisions
+
+The first version was two shell-script containers. It worked, but logic was
+buried in bash and hard to extend, so I rewrote it as an **Ansible
+playbook pipeline** — clone, fetch, sanitise, push — with the device fleet
+described in an inventory file grouped per product family.
+
+Three decisions carry the design:
+
+**Commit only real changes.** After exporting all configs, the playbook
+diffs the working tree. `nothing to commit` is a success, not a failure —
+the repository history contains only actual configuration changes, so a
+`git log` on a device file reads as a clean audit trail.
+
+**Sanitise before committing.** An explicit redaction step strips password
+fields and volatile lines (timestamps, time-server state) from every
+exported config. Credentials never enter git history, and configs don't
+produce phantom diffs because a clock ticked.
+
+**Fail per device, not per run.** Each device group runs in a
+`block/rescue` pair with retries: an unreachable gateway logs an error and
+the run continues to the next device. A backup system that stops at the
+first failure protects exactly the devices that need it least.
+
+## Challenges
+
+The fleet's hardware diversity produced the two hardest bugs. Several Moxa
+models (ioLogik E12, NPort 51xx, MGate 3xxx) **reject any username** in
+Moxa's own `mcc_tool` — the playbook now queries the device model first and
+passes credentials conditionally. And running config fetches in parallel
+caused **filename collisions** inside the container; restructuring the
+playbook to run device groups sequentially, with retries per device,
+removed the race without giving up robustness.
+
+## Results
+
+Every Moxa device in scope now has a versioned configuration history,
+refreshed every six hours, with secrets redacted at the source. Restoring a
+device after a bad change went from "reconstruct the config from memory" to
+checking out a known-good snapshot. The Ansible rewrite replaced the legacy
+shell containers, and the image builds and ships through Azure Pipelines
+like any other service.
+
+Honest limits: recovery is still a manual apply — the pipeline records
+state, it does not push configs back to devices. That, plus onboarding via
+a service account rather than personal credentials, is the natural next
+step.
+
+## Lessons learned
+
+- **Automation earns trust through its failure modes.** Idempotent commits,
+  redaction and per-device isolation matter more than the happy path.
+- **Inventory-driven beats script-driven.** Adding a device is now a YAML
+  entry, not a code change.
+- **Six hours of granularity is enough.** The value is having _any_
+  known-good state — chasing real-time sync would have added complexity
+  without adding safety.
