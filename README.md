@@ -130,6 +130,16 @@ npm run build       # creates the finished site in ./dist
 npm run preview     # look at the finished site locally
 ```
 
+To rebuild the full CV pipeline and then produce a deploy-ready site build:
+
+```sh
+./scripts/cv/build-all.sh
+```
+
+This script uses `wkhtmltopdf --enable-local-file-access` for the CV PDF render,
+checks that the output is exactly one page, regenerates `src/assets/cv/cv-page-*.png`,
+then runs lint + build. It requires `wkhtmltopdf`, Python 3, and `pymupdf`.
+
 ---
 
 ## Handy commands

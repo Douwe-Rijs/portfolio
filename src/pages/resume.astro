@@ -1,17 +1,23 @@
 ---
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import cvPage1 from '@/assets/cv/cv-page-1.png';
-import cvPage2 from '@/assets/cv/cv-page-2.png';
 
 const pdfHref = '/cv-douwe-rijs.pdf';
-const pages = [
-  { src: cvPage1, alt: 'Résumé of Douwe Rijs, page 1 of 2: profile, education and experience.' },
-  {
-    src: cvPage2,
-    alt: 'Résumé of Douwe Rijs, page 2 of 2: selected projects, technical skills and languages.',
-  },
-];
+const cvPageEntries = Object.entries(
+  import.meta.glob<{ default: ImageMetadata }>('../assets/cv/cv-page-*.png', { eager: true }),
+).sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
+
+const pages = cvPageEntries.map(([path, mod]) => {
+  const match = path.match(/cv-page-(\d+)\.png$/);
+  const pageNumber = match ? Number.parseInt(match[1], 10) : 1;
+  const pageCount = cvPageEntries.length;
+
+  return {
+    src: mod.default,
+    alt: `Résumé of Douwe Rijs, page ${pageNumber} of ${pageCount}.`,
+  };
+});
 ---
 
 <BaseLayout
@@ -31,8 +37,8 @@ const pages = [
     </div>
     <p class="mt-6 max-w-2xl text-muted">
       Robotics &amp; ML engineer with experience building real-world perception, software and ML
-      systems across the autonomy stack. Two pages —{' '}
-      <a href={pdfHref} class="text-accent underline underline-offset-4">view the PDF</a> or download
+      systems across the autonomy stack.{' '}
+      <a href={pdfHref} class="text-accent underline underline-offset-4">View the PDF</a> or download
       it above.
     </p>
   </section>

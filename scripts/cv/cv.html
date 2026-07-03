@@ -1,234 +1,178 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>Douwe Rijs — CV</title>
-    <!--
-  Source of truth for the résumé PDF.
-  Regenerate with:
-    python3 -m weasyprint scripts/cv/cv.html public/cv-douwe-rijs.pdf
-    python3 -c "import fitz; d=fitz.open('public/cv-douwe-rijs.pdf'); [p.get_pixmap(dpi=150).save(f'src/assets/cv/cv-page-{i+1}.png') for i,p in enumerate(d)]"
-  (needs: pip install weasyprint pymupdf; PT Serif fonts in ~/.fonts)
--->
     <style>
       @page {
         size: A4;
-        margin: 22mm 20mm 20mm 20mm;
-        @bottom-center {
-          content: 'Douwe Rijs — Curriculum Vitae — ' counter(page) ' / ' counter(pages);
-          font-family: 'PT Serif', serif;
-          font-size: 8pt;
-          color: #666;
-        }
+        margin: 16mm 18mm 14mm 18mm;
       }
       * {
         box-sizing: border-box;
       }
       body {
-        font-family: 'PT Serif', serif;
-        font-size: 10pt;
-        line-height: 1.45;
-        color: #111;
-        margin: 0;
-      }
-      header {
-        text-align: center;
-        margin-bottom: 4mm;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        color: #1a1a1a;
+        font-size: 9.7pt;
+        line-height: 1.42;
       }
       h1 {
         font-size: 21pt;
-        font-weight: bold;
-        letter-spacing: 0.04em;
-        margin: 0 0 1mm;
+        margin: 0 0 2px 0;
+        letter-spacing: 0.3px;
+        color: #10233f;
       }
       .subtitle {
-        font-size: 10.5pt;
-        font-style: italic;
-        margin: 0 0 2mm;
-        color: #333;
+        font-size: 10pt;
+        color: #3a5a80;
+        margin: 0 0 6px 0;
+        font-weight: 600;
       }
       .contact {
-        font-size: 9pt;
-        color: #333;
+        font-size: 8.7pt;
+        color: #444;
+        margin-bottom: 14px;
       }
-      .contact span + span::before {
-        content: '  ·  ';
+      .contact span:not(:last-child)::after {
+        content: ' \00b7 ';
         color: #999;
       }
-      .contact a {
-        color: #333;
-        text-decoration: none;
+      .profile {
+        font-size: 9.5pt;
+        color: #262626;
+        margin-bottom: 16px;
+        line-height: 1.5;
       }
-
       h2 {
-        font-size: 10.5pt;
-        font-weight: bold;
+        font-size: 10.3pt;
+        color: #10233f;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        border-bottom: 0.6pt solid #111;
-        padding-bottom: 1mm;
-        margin: 5.5mm 0 2.5mm;
+        letter-spacing: 1.1px;
+        border-bottom: 1.4px solid #10233f;
+        padding-bottom: 3px;
+        margin: 16px 0 8px 0;
       }
       .entry {
-        margin-bottom: 3mm;
-        page-break-inside: avoid;
+        margin-bottom: 10px;
       }
-      .entry-head {
+      .entry-header {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
       }
       .entry-title {
-        font-weight: bold;
+        font-weight: 700;
+        font-size: 9.9pt;
+        color: #1a1a1a;
       }
       .entry-org {
-        font-style: italic;
-        color: #333;
+        font-weight: 400;
+        color: #3a5a80;
       }
       .entry-date {
-        font-size: 9pt;
-        color: #444;
+        font-size: 8.7pt;
+        color: #666;
         white-space: nowrap;
-        padding-left: 6mm;
+        margin-left: 10px;
+      }
+      .entry-sub {
+        font-size: 8.9pt;
+        color: #555;
+        font-style: italic;
+        margin-top: 1px;
       }
       ul {
-        margin: 1mm 0 0;
-        padding-left: 4.5mm;
+        margin: 3px 0 0 0;
+        padding-left: 15px;
       }
       li {
-        margin-bottom: 0.8mm;
+        margin-bottom: 2px;
       }
-      p.profile {
-        margin: 0;
-        text-align: justify;
-      }
-
-      table.skills {
-        border-collapse: collapse;
+      .skills-grid {
+        display: table;
         width: 100%;
+        border-collapse: collapse;
       }
-      table.skills td {
+      .skills-row {
+        display: table-row;
+      }
+      .skills-label {
+        display: table-cell;
+        font-weight: 700;
+        color: #10233f;
+        width: 130px;
+        padding: 2.5px 0;
         vertical-align: top;
-        padding: 0.4mm 0;
       }
-      table.skills td.k {
-        font-weight: bold;
-        width: 36mm;
-        padding-right: 4mm;
-        white-space: nowrap;
+      .skills-value {
+        display: table-cell;
+        padding: 2.5px 0;
+        vertical-align: top;
+      }
+      .two-col {
+        display: flex;
+        gap: 24px;
+      }
+      .two-col > div {
+        flex: 1;
+      }
+      .footer-note {
+        font-size: 7.5pt;
+        color: #999;
+        text-align: right;
+        margin-top: 4px;
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>Douwe Rijs</h1>
-      <p class="subtitle">Robotics &amp; Machine Learning Engineer · MSc Robotics, TU Delft</p>
-      <p class="contact">
-        <span>Bosboom Toussaintplein 152, Delft, The Netherlands</span><span>+31 6 83903534</span
-        ><span><a href="mailto:Douwe@standofl.nl">Douwe@standofl.nl</a></span
-        ><span
-          ><a href="https://www.linkedin.com/in/douwe-rijs-7990b2259/"
-            >linkedin.com/in/douwe-rijs-7990b2259</a
-          ></span
-        >
-      </p>
-    </header>
+    <h1>Douwe Rijs</h1>
+    <div class="subtitle">
+      Robotics &amp; Machine Learning Engineer &middot; MSc Robotics, TU Delft
+    </div>
+    <div class="contact">
+      <span>Delft, The Netherlands</span>
+      <span>+31 6 83903534</span>
+      <span>Douwe@standofl.nl</span>
+      <span>linkedin.com/in/douwerijs-7990b2259</span>
+    </div>
 
-    <h2>Profile</h2>
-    <p class="profile">
+    <div class="profile">
       Robotics MSc student at TU Delft with a Mechanical Engineering background and a strong focus
       on machine learning, perception and control systems. Hands-on R&amp;D experience in computer
       vision, transformer models and enterprise software development at Allseas. Motivated to apply
       advanced robotics and ML to real-world industrial systems.
-    </p>
-
-    <h2>Education</h2>
-
-    <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">MSc Robotics</span> —
-          <span class="entry-org">Delft University of Technology</span></span
-        >
-        <span class="entry-date">2025 – present</span>
-      </div>
-      <ul>
-        <li><i>Machine Learning:</i> SVMs, PCA, CNNs and RNNs applied to robotics problems.</li>
-        <li>
-          <i>Deep Reinforcement Learning:</i> value- and policy-based methods (DQN, actor–critic)
-          for control and decision-making.
-        </li>
-        <li>
-          <i>Machine Perception:</i> pose estimation from noisy sensor data; Kalman filtering;
-          LiDAR, radar and stereo vision.
-        </li>
-        <li>
-          <i>Robot Dynamics &amp; Control:</i> impedance control and open-loop control of
-          manipulators.
-        </li>
-        <li>
-          <i>Planning &amp; Decision Making:</i> sampling-based motion planning (RRT*), MPC, PID and
-          search algorithms.
-        </li>
-      </ul>
-    </div>
-
-    <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">BSc Mechanical Engineering</span> —
-          <span class="entry-org">Delft University of Technology</span></span
-        >
-        <span class="entry-date">2022 – Oct 2025</span>
-      </div>
-      <ul>
-        <li>GPA 7.1/10; thesis graded 8.0/10.</li>
-        <li>
-          Thesis: chemotherapy-injection assisting device — medical-device regulations and CE
-          certification of a clinical design.
-        </li>
-        <li>Core: mechanics, dynamics, materials science, control theory, numerical simulation.</li>
-        <li>
-          <i>Minor Computer Science:</i> machine learning fundamentals, camera geometry and 3D
-          reconstruction, algorithms &amp; data structures, software engineering and collaborative
-          development (Git).
-        </li>
-      </ul>
-    </div>
-
-    <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">VWO (pre-university)</span> —
-          <span class="entry-org">Haarlemmermeerlyceum, Hoofddorp</span></span
-        >
-        <span class="entry-date">2016 – 2022</span>
-      </div>
-      <ul>
-        <li>Science &amp; technology profile; languages: Dutch, English, Chinese.</li>
-      </ul>
     </div>
 
     <h2>Experience</h2>
 
     <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Assistant R&amp;D Engineer</span> —
-          <span class="entry-org">Allseas, Delft</span></span
-        >
-        <span class="entry-date">Feb 2025 – present</span>
+      <div class="entry-header">
+        <div class="entry-title">
+          Future Flight Operations Intern
+          <span class="entry-org">&mdash; Boeing Innovation Lab, Neu-Isenburg (Germany)</span>
+        </div>
+        <div class="entry-date">Sep &ndash; Dec 2026 (upcoming)</div>
+      </div>
+      <div class="entry-sub">
+        Mandatory MSc internship on autonomy and AI/ML applications for future flight operations.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-header">
+        <div class="entry-title">
+          Assistant R&amp;D Engineer <span class="entry-org">&mdash; Allseas, Delft</span>
+        </div>
+        <div class="entry-date">Feb 2025 &ndash; Aug 2026</div>
       </div>
       <ul>
         <li>
           Built a network observability platform polling 100+ switches via SNMP, aggregating
-          port-level metrics (data rate, VLAN, link status) for real-time diagnostics — improving
-          system insight and debugging efficiency.
+          port-level metrics (data rate, VLAN, link status) for real-time diagnostics.
         </li>
         <li>
-          Developed a hybrid OCR/VLM pipeline that reads handwritten pipe IDs on curved steel
-          surfaces; evaluated multiple transformer models and custom preprocessing, reaching ~81%
-          accuracy on noisy industrial data.
+          Designed an R&amp;D computer-vision/VLM pipeline for reading pipe IDs on curved steel
+          &mdash; see Selected Projects.
         </li>
         <li>
           Implemented Azure DevOps CI/CD pipelines automating versioning and software releases from
@@ -241,133 +185,149 @@
       </ul>
     </div>
 
+    <h2>Education</h2>
+
     <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Freelance waiter</span> —
-          <span class="entry-org">Standofl-Kelner (own registration)</span></span
-        >
-        <span class="entry-date">2022 – 2025</span>
+      <div class="entry-header">
+        <div class="entry-title">
+          MSc Robotics <span class="entry-org">&mdash; Delft University of Technology</span>
+        </div>
+        <div class="entry-date">2025 &ndash; present</div>
       </div>
-      <ul>
-        <li>
-          Freelance service work at restaurants and events; client communication and own tax
-          administration.
-        </li>
-      </ul>
+      <div class="entry-sub">
+        Machine learning, deep reinforcement learning, machine perception (sensor fusion, Kalman
+        filtering, LiDAR/radar/stereo vision), robot dynamics &amp; control, motion planning (RRT*,
+        MPC).
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-header">
+        <div class="entry-title">
+          BSc Mechanical Engineering
+          <span class="entry-org">&mdash; Delft University of Technology</span>
+        </div>
+        <div class="entry-date">2022 &ndash; Oct 2025</div>
+      </div>
+      <div class="entry-sub">
+        Thesis (8.0/10): chemotherapy-injection assisting device &mdash; medical-device regulations
+        &amp; CE certification. Minor in Computer Science: ML fundamentals, camera geometry &amp; 3D
+        reconstruction, algorithms &amp; software engineering.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-header">
+        <div class="entry-title">
+          VWO (pre-university)
+          <span class="entry-org">&mdash; Haarlemmermeerlyceum, Hoofddorp</span>
+        </div>
+        <div class="entry-date">2016 &ndash; 2022</div>
+      </div>
     </div>
 
     <h2>Selected Projects</h2>
 
     <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Greenhouse Monitoring Robot &amp; Digital Twin (MIRTE)</span> —
-          <span class="entry-org">TU Delft, team of 5</span></span
-        >
-        <span class="entry-date">2026</span>
+      <div class="entry-title">
+        Greenhouse Monitoring Robot &amp; Digital Twin (MIRTE)
+        <span class="entry-org">&mdash; TU Delft, team of 5</span>
       </div>
       <ul>
         <li>
-          Autonomous ROS 2 robot on the MIRTE Master platform that maps a greenhouse with SLAM
-          (Nav2, SLAM Toolbox), inspects every flower bed and streams detected plants, pests and
-          climate data into a live digital twin.
+          Autonomous ROS 2 robot mapping a greenhouse via SLAM (Nav2, SLAM Toolbox), inspecting
+          flower beds and streaming plant/pest/climate data into a live digital twin.
         </li>
         <li>
-          Owned the decision-making layer: a state machine orchestrating navigation, scanning, fault
-          recovery and battery-triggered return-to-dock; YOLOv8 detection and AprilTag localisation
+          Owned the decision-making layer: a state machine for navigation, scanning, fault recovery
+          and battery-triggered return-to-dock, with YOLOv8 detection and AprilTag localisation
           validated in simulation and on the real robot.
         </li>
         <li>
-          Managed the five-person team's GitLab issue board and branch/review workflow; 7 of 8
-          mandatory client requirements met in 8 weeks.
+          Managed the team's GitLab workflow; 7 of 8 mandatory client requirements met in 8 weeks.
         </li>
       </ul>
     </div>
 
     <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Autonomous Flight of a Micro Air Vehicle</span> —
-          <span class="entry-org">TU Delft MAVLab</span></span
-        >
-        <span class="entry-date">2025</span>
+      <div class="entry-title">
+        Autonomous Flight of a Micro Air Vehicle
+        <span class="entry-org">&mdash; TU Delft MAVLab</span>
       </div>
       <ul>
         <li>
-          Vision-only obstacle avoidance for a Parrot Bebop 2 flying autonomously in the CyberZoo —
-          no external motion capture or off-board compute.
+          Vision-only obstacle avoidance for a Parrot Bebop 2 flying autonomously in the CyberZoo
+          &mdash; no motion capture or off-board compute.
         </li>
         <li>
           Implemented border, gate and vertical-obstacle detection in C/C++ inside the Paparazzi
-          autopilot; optimised the vision stack to 8–11 FPS on the drone's onboard ARM processor.
+          autopilot; optimised the vision stack to 8&ndash;11 FPS on the drone's onboard ARM
+          processor.
         </li>
       </ul>
     </div>
 
     <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Multi-Sensor 3D Object Detection</span> —
-          <span class="entry-org">TU Delft, Machine Perception</span></span
-        >
-        <span class="entry-date">2025</span>
+      <div class="entry-title">
+        Pipe-ID Recognition Pipeline <span class="entry-org">&mdash; Allseas R&amp;D</span>
       </div>
       <ul>
         <li>
-          Built a multi-sensor perception pipeline (LiDAR, camera, radar) for 3D bounding-box
-          detection on the real-world View-of-Delft driving dataset, handling noisy and sparse
-          sensor data.
+          Built an end-to-end CV/VLM pipeline reading stencilled &amp; chalked pipe IDs from photos
+          taken inside pipeline pipes, raising exact-ID accuracy from ~1% to ~80%.
+        </li>
+        <li>
+          Benchmarked four OCR engines (Tesseract, EasyOCR, PaddleOCR, TrOCR), then diagnosed
+          failure modes and pivoted to a tuned VLM approach when classical OCR plateaued.
+        </li>
+        <li>
+          Doubled exact-match accuracy (29% &rarr; 59%) purely through YOLO oriented-bounding-box
+          crop preprocessing &mdash; before any model tuning &mdash; showing preprocessing
+          outweighed model choice.
+        </li>
+        <li>
+          Prototyped a stencil- and colour-agnostic ID locator using CRAFT text/linking scores with
+          per-project arc-fitted text maps, generalising across pipelines with different layouts;
+          evaluated 360&deg; capture to remove blind-spot failures.
         </li>
       </ul>
     </div>
 
-    <div class="entry">
-      <div class="entry-head">
-        <span
-          ><span class="entry-title">Quadrotor Motion Planning</span> —
-          <span class="entry-org">TU Delft, Planning &amp; Decision Making</span></span
-        >
-        <span class="entry-date">2025</span>
+    <h2>Skills</h2>
+    <div class="skills-grid">
+      <div class="skills-row">
+        <div class="skills-label">Programming</div>
+        <div class="skills-value">Python, Go, TypeScript/JavaScript, React, C++, MATLAB</div>
       </div>
-      <ul>
-        <li>
-          Implemented RRT* motion planning for autonomous quadrotor navigation and analysed its
-          limitations in dynamic scenarios without integrated control (MPC).
-        </li>
-      </ul>
-    </div>
-
-    <h2>Technical Skills</h2>
-    <table class="skills">
-      <tr>
-        <td class="k">Programming</td>
-        <td>Python, Go, TypeScript/JavaScript, React, C++, MATLAB</td>
-      </tr>
-      <tr>
-        <td class="k">Machine learning</td>
-        <td>
+      <div class="skills-row">
+        <div class="skills-label">Machine Learning</div>
+        <div class="skills-value">
           CNNs, RNNs, Transformers, VLMs, deep reinforcement learning, SVM, PCA, Hugging Face, YOLO
-        </td>
-      </tr>
-      <tr>
-        <td class="k">Robotics</td>
-        <td>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Robotics</div>
+        <div class="skills-value">
           ROS 2, SLAM, Nav2, sensor fusion, Kalman filtering, LiDAR, radar, stereo vision, pose
           estimation
-        </td>
-      </tr>
-      <tr>
-        <td class="k">Control &amp; planning</td>
-        <td>PID, MPC, impedance control, robot dynamics, RRT*, search algorithms</td>
-      </tr>
-      <tr>
-        <td class="k">Tools &amp; DevOps</td>
-        <td>Git, Azure DevOps, CI/CD, Docker, Linux, observability &amp; monitoring</td>
-      </tr>
-    </table>
-
-    <h2>Languages</h2>
-    <p>Dutch (native) · English (fluent) · Chinese (elementary)</p>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Control &amp; Planning</div>
+        <div class="skills-value">
+          PID, MPC, impedance control, robot dynamics, RRT*, search algorithms
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Tools &amp; DevOps</div>
+        <div class="skills-value">
+          Git, Azure DevOps, CI/CD, Docker, Linux, observability &amp; monitoring
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Languages</div>
+        <div class="skills-value">Dutch (native), English (fluent), Chinese (elementary)</div>
+      </div>
+    </div>
   </body>
 </html>
