@@ -169,14 +169,8 @@
       </div>
       <ul>
         <li>
-          Developed an end-to-end computer-vision/VLM pipeline reading stencilled and chalked pipe
-          IDs from photos taken inside pipeline pipes, increasing exact-ID accuracy from ~1% to
-          ~80%.
-        </li>
-        <li>
-          Benchmarked four OCR architectures and pivoted to a tuned VLM after classical OCR
-          plateaued; doubled exact-match accuracy (29% &rarr; 59%) through oriented-bounding-box
-          crop preprocessing alone.
+          Designed and built a computer-vision/VLM pipeline for automated pipe-ID recognition
+          &mdash; see Robotics &amp; AI Projects below.
         </li>
         <li>
           Built a network observability platform monitoring 100+ switches via SNMP, aggregating
@@ -269,6 +263,27 @@
           Implemented border, gate and vertical-obstacle detection in C/C++ inside the Paparazzi
           autopilot; optimised the vision stack to 8&ndash;11 FPS on the drone's onboard ARM
           processor.
+        </li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-title">
+        Pipe-ID Recognition from Steel Pipe Imagery
+        <span class="entry-org">&mdash; Allseas R&amp;D</span>
+      </div>
+      <ul>
+        <li>
+          Developed an end-to-end CV/VLM pipeline reading stencilled &amp; chalked pipe IDs from
+          photos taken inside pipeline pipes, increasing exact-ID accuracy from ~1% to ~80%.
+        </li>
+        <li>
+          Benchmarked four OCR architectures (Tesseract, EasyOCR, PaddleOCR, TrOCR), diagnosed
+          failure modes and pivoted to a tuned VLM approach after classical OCR plateaued.
+        </li>
+        <li>
+          Improved exact-match accuracy from 29% to 59% through YOLO oriented-bounding-box crop
+          preprocessing alone &mdash; demonstrating that preprocessing outweighed model choice.
         </li>
       </ul>
     </div>
