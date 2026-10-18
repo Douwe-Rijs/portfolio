@@ -1,0 +1,197 @@
+---
+title: 'From Reinforcement Learning Fundamentals to Humanoid Control'
+summary: 'A progression from value functions, classic-control coursework and exploration methods to a reproducible SAC balance campaign for a simulated humanoid.'
+role: 'Reinforcement learning systems & experiments'
+timeframe: 'TU Delft · 2026'
+teamSize: 'Independent coursework and research project'
+preset: 'technical'
+forceTheme: 'dark'
+contributions:
+  - 'Implemented and extended the learning loop across REINFORCE, actor-critic and PPO exercises, including returns, bootstrapping and clipped policy updates.'
+  - 'Applied the algorithms across tabular reasoning, CartPole, MountainCar and Acrobot before moving to continuous humanoid control.'
+  - 'Built the humanoid balance environment around explicit observations, rewards, termination conditions and evaluation gates.'
+  - 'Ran long SAC campaigns, checkpointed policies, rendered rollout videos and wrote failure-mode reports for reproducible diagnosis.'
+skills:
+  - 'Reinforcement learning'
+  - 'Experiment design'
+  - 'Failure analysis'
+  - 'Simulation tooling'
+takeaways:
+  - 'A longer training run is not evidence of a better controller: fixed physical gates made that visible.'
+  - 'Reward shaping, termination and evaluation must be designed as one control problem.'
+  - 'The most useful result was a reproducible failure boundary, not a polished demo.'
+tech:
+  - 'Python'
+  - 'PyTorch'
+  - 'Gymnasium'
+  - 'MuJoCo'
+  - 'SAC'
+  - 'PPO'
+  - 'DQN / Double DQN'
+  - 'RND exploration'
+  - 'Experiment checkpointing'
+categories:
+  - 'Reinforcement learning'
+  - 'Humanoid robotics'
+  - 'Simulation'
+featured: true
+order: 1
+heroImage: '../../assets/projects/humanoid-rl/humanoid-hero.jpg'
+heroAlt: 'A simulated humanoid during a late Soft Actor-Critic balance rollout.'
+results:
+  - { label: 'SAC transitions logged', value: '131.6M' }
+  - { label: 'Final balance-gate pass rate', value: '0 / 5' }
+  - { label: 'Mean final duration', value: '0.39 s' }
+  - { label: 'Mean final max tilt', value: '39.6 deg' }
+gallery:
+  - src: '../../assets/projects/humanoid-rl/cartpole-training.png'
+    alt: 'CartPole training curves for episode return, episode length and loss over environment steps.'
+    caption: 'CartPole: the actor-critic training loop learns to sustain long episodes.'
+  - src: '../../assets/projects/humanoid-rl/mountaincar-exploration.png'
+    alt: 'MountainCar training curves showing improving episode return, changing episode length and loss during exploration.'
+    caption: 'MountainCar: sparse reward makes exploration and learning progress visible in the curves.'
+status: 'published'
+publishedDate: 2026-10-18
+---
+
+## Overview
+
+This is the story of how I built my reinforcement-learning practice in two
+stages. I started with the coursework: reasoning about value functions and
+partial observability, implementing deep Q-learning and policy gradients, and
+testing exploration methods in classic control environments. That work gave me
+the algorithmic vocabulary and the experiment habits to move beyond toy tasks.
+
+I then applied those lessons to a humanoid balance project. The second stage
+added the engineering difficulty that textbook environments hide: many coupled
+continuous actions, physical failure modes, long training campaigns and the
+need to evaluate what the body actually does rather than trust a scalar return.
+This made it way more difficult to solve with simple continious time policies than i had
+originally thought.
+
+The result is deliberately not framed as a solved walking controller. The
+current SAC campaign reached 131.6 million transitions. But still as seen in the videos the result degraded hard,
+not converging on a working policy.
+
+## Part 1 — Coursework: building the RL foundations
+
+The coursework broadened the project across different kinds of RL difficulty:
+
+- **Delayed reward and memory:** deriving value comparisons and designing a
+  memory-based policy for partially observed state, where the agent must retain
+  a cue and a step count rather than react to the current observation alone.
+- **CartPole:** implementing REINFORCE, then adding a learned value baseline,
+  bootstrapped TD targets, actor-critic updates and off-policy actor-critic
+  learning. PPO clipping limited the size of each policy update.
+- **MountainCar:** exposing the exploration problem in an environment where
+  random behaviour rarely reaches the useful reward. Rescaled states and
+  intrinsic reward made exploration an explicit experimental variable.
+- **Acrobot:** comparing Double DQN with and without intrinsic exploration,
+  then implementing count-based uncertainty and Random Network Distillation
+  as two ways to reward novel states.
+- **Engineering layer:** building replay buffers, episode runners, return
+  calculation, epsilon decay, training plots and checkpoint-oriented logging
+  so algorithm changes could be compared rather than guessed at.
+
+The figures below show two of those learning problems: a relatively dense
+CartPole signal and the much sparser MountainCar exploration problem. The
+coursework I completed has taught me the basics of reinforcement learning, and
+the math behind the corrosponding algorithms.
+
+<Figure
+  src={import('../../assets/projects/humanoid-rl/cartpole-training.png')}
+  alt="CartPole training curves showing episode return, episode length and loss over environment steps."
+  caption="The coursework made learning dynamics inspectable before the project moved to continuous humanoid control."
+  priority
+/>
+<Figure
+  src={import('../../assets/projects/humanoid-rl/mountaincar-exploration.png')}
+  alt="MountainCar training curves showing episode return, episode length and loss over environment steps."
+  caption="The coursework made learning dynamics inspectable before the project moved to continuous humanoid control."
+  priority
+/>
+## Part 2 — Humanoid project: applying the foundations
+
+### The problem
+
+Humanoid control is unforgiving. The agent must coordinate many continuous joint
+actions while keeping its centre of mass and torso orientation inside a narrow
+balance envelope. A reward curve can improve while the robot still falls almost
+immediately, especially when the reward, termination condition and evaluation
+metric measure different things.
+
+The project therefore treated evaluation as part of the controller design. A
+run was not considered successful because it had trained for longer or produced
+an attractive frame. It had to survive the fixed balance suite without falling,
+excessive tilt or unacceptable drift.
+
+### The control stack
+
+The humanoid environment exposes a structured observation, the SAC policy emits
+continuous joint actions, and the reward combines task progress with posture and
+stability terms. The evaluator reports physical failure modes separately from
+training statistics.
+
+The important change in scale is from discrete textbook actions to a body with
+many coupled joints. Techniques that look separate in CartPole or Acrobot become
+design constraints here: replay quality, exploration, reward shaping,
+termination and evaluation all affect whether a policy can keep its balance.
+
+### Humanoid training evidence
+
+The videos below show the policy directly at different points in the campaign.
+
+<Video
+  src="/media/humanoid-rl/sac-early.mp4"
+  label="Early SAC humanoid balance rollout at approximately 0.85 million transitions."
+  caption="Early training: the agent is still discovering stabilising actions."
+  autoplay={false}
+/>
+
+<Video
+  src="/media/humanoid-rl/sac-mid.mp4"
+  label="Mid-campaign SAC humanoid balance rollout at approximately 11.5 million transitions."
+  caption="Mid-campaign: more coordinated motion, but still not a passing balance policy."
+  autoplay={false}
+/>
+
+<Video
+  src="/media/humanoid-rl/sac-late.mp4"
+  label="Late SAC humanoid balance rollout at approximately 24 million transitions."
+  caption="Late checkpoint: a compact training artifact that can be replayed and inspected."
+  autoplay={false}
+/>
+
+### What failed, and why that matters
+
+The final diagnostic report recorded **0/5** passing episodes, a mean duration
+of **0.39 seconds**, and a mean maximum tilt of **39.6 degrees**. Every episode
+was classified as both `fell:too_low` and `tilt_exceeded_too_often`. The policy
+did not merely miss a target; it lost the physical state the task required it
+to preserve.
+
+I also kept a behaviour-cloning warm-start run as a comparison rather than
+silently merging it with the SAC results. Its later checkpoints also failed the
+five-episode gate, which suggests that initialisation alone was not enough to
+solve the control problem.
+
+<Video
+  src="/media/humanoid-rl/sac-bc-warm.mp4"
+  label="A humanoid rollout from the behaviour-cloning warm-start SAC campaign."
+  caption="Warm-start comparison: a separate run, kept distinct from the main SAC campaign."
+  autoplay={false}
+/>
+
+## Lessons learned
+
+- **Evaluate the body, not only the loss.** Duration, tilt and drift explain a
+  controller's failure more directly than a training curve alone.
+- **Reward shaping is a systems decision.** A reward that encourages motion but
+  does not protect the balance envelope can produce apparently active yet
+  unusable behaviour.
+- **Checkpoint videos are part of the experiment record.** They make regressions
+  and failure modes inspectable without rerunning a long campaign.
+- **Negative results can be engineering results.** The current policy is not a
+  solved humanoid controller, but the run infrastructure makes the next
+  intervention testable: reward calibration, termination timing and controller
+  assistance can be changed one variable at a time.
